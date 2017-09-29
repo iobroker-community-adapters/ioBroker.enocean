@@ -58,8 +58,10 @@ var adapter = utils.adapter({
 
 var eo      = require("node-enocean")();
 var sP      = require("serialport");
+var os      = require('os');
 
-
+var platform = os.platform();
+//adapter.log.info('OS: ' + platform);
 
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
@@ -296,7 +298,14 @@ function getSerial(){
             } else {
                 for (NrOfPorts; NrOfPorts >= 0; NrOfPorts--) {
                     var portName = ports[NrOfPorts]['comName'];
-                    result.push(portName);
+                    if(platform == 'linux'){
+                        var isUSB = portName.match(/ttyUSB/g)
+                        if(isUSB){
+                            result.push(portName);
+                        }
+                    }else {
+                        result.push(portName);
+                    }
                 }
 
                 adapter.log.info(result);
