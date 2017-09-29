@@ -48,7 +48,7 @@
                 )
             ;
             for (var j = 0; j < list.length; j++) {
-                if (list[j].comName === 'Not available') {
+                if (list[j] === 'Not available') {
                     dropdown.append(
                         $('<option value="" selected>').text(_('Not available'))
                     );
