@@ -1,31 +1,3 @@
-/**
- *
- * template adapter
- *
- *
- *  file io-package.json comments:
- *
- *  {
- *      "common": {
- *          "name":         "enocean",                  // name has to be set and has to be equal to adapters folder name and main file name excluding extension
- *          "version":      "0.1.0",                    // use "Semantic Versioning"! see http://semver.org/
- *          "title":        "Node.js EnOcean Adapter",  // Adapter title shown in User Interfaces
- *          "authors":  [                               // Array of authord
- *              "Jey Cee <jey-cee@live.com>"
- *          ]
- *          "desc":         "EnOcean adapter",          // Adapter description shown in User Interfaces. Can be a language object {de:"...",ru:"..."} or a string
- *          "platform":     "Javascript/Node.js",       // possible values "javascript", "javascript/Node.js" - more coming
- *          "mode":         "daemon",                   // possible values "daemon", "schedule", "subscribe"
- *          "loglevel":     "info"                      // Adapters Log Level
- *      },
- *      "native": {                                     // the native object is available via adapter.config in your adapters code - use it for configuration
- *          "test1": true,
- *          "test2": 42
- *      }
- *  }
- *
- */
-
 /* jshint -W097 */// jshint strict:false
 /*jslint node: true */
 "use strict";
@@ -38,22 +10,6 @@ var utils =    require(__dirname + '/lib/utils'); // Get common adapter utils
 // adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
 var adapter = utils.adapter({
     name: 'enocean',
-
-    message: function (obj) {
-        // handle the message
-        if (obj) {
-            switch (obj.command) {
-
-                case 'listUart':
-                    if (obj.callback) {
-                        var ports = listSerial();
-                        adapter.log.info('List of ports: ' + JSON.stringify(ports));
-                        respond(ports);
-                    }
-                    break;
-            }
-        }
-    }
 });
 
 var eo      = require("node-enocean")();
