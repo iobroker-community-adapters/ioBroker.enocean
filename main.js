@@ -48,7 +48,7 @@ adapter.on('stateChange', function (id, state) {
 });
 
 // Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
-adapter.on('message', function (obj) {
+adapter.on('message', async function (obj) {
 
     // responds to the adapter that sent the original message
     function respond(response) {
@@ -84,7 +84,12 @@ adapter.on('message', function (obj) {
         switch (obj.command) {
             case "listSerial":
                 // enumerate serial ports for admin interface
-                respond({ error: null, result: listSerial() });
+                try {
+                    const ports = await listSerial();
+                    respond({ error: null, result: ports });
+                } catch (e) {
+                    respond({ error: e, result: ['Not available'] });
+                }
                 break;
         }
     }
@@ -94,40 +99,22 @@ adapter.on('message', function (obj) {
 // is called when databases are connected and adapter received configuration.
 // start here!
 adapter.on('ready', function () {
-    getSerial();
     main();
-
-
 });
 
-function main() {
-    //Check if port exists and start listening
-    var port;
-    sP.list(function(err, ports){
-        if(err){
-            adapter.log.error('Existing ports error:' + err);
-        }else {
-            var NrOfPorts = ports.length -1;
-
-            if(NrOfPorts == -1){
-                adapter.log.error('No device found: Please check your Serialport setting and your Gateway')
-            }else {
-                for (NrOfPorts; NrOfPorts >= 0; NrOfPorts--) {
-                    var portName = ports[NrOfPorts]['comName'];
-                    if (portName = adapter.config.serialport) {
-                        adapter.log.debug('Found Serialport and start listening');
-                        eo.listen(adapter.config.serialport);
-                        break;
-                    } else {
-                        adapter.log.error('No USB device found: Please check your Serialport setting and your USB Gateway');
-                    }
-                    adapter.log.debug('Existing ports: ' + portName);
-                }
-            }
+async function main() {
+    //Check if configured port exists and start listening
+    try {
+        const availablePorts = await listSerial();
+        if (availablePorts.indexOf(adapter.config.serialport) > -1) {
+            adapter.log.debug('Found Serialport and start listening');
+            eo.listen(adapter.config.serialport);
+        } else {
+            throw new Error("Configured serial port is not available. Please check your Serialport setting and your USB Gateway.");            
         }
-    });
-
-
+    } catch (e) {
+        adapter.log.error(e);
+    }
 }
 
 eo.on("ready", function(data){
@@ -183,7 +170,7 @@ eo.on("known-data",function(data) {
     });
 
     adapter.setState(senderID + '.rssi', {val: rssi, ack: true});
-
+    
     //write values transmitted by device
     for (nrOfValues = nrOfValues - 1; nrOfValues >= 0; nrOfValues--) {
         var name = data['values'][nrOfValues]['type'];
@@ -240,40 +227,33 @@ eo.on("known-data",function(data) {
     });
 });
 
-var result =[];
-function getSerial(){
+async function listSerial() {
 
-    sP.list(function(err, ports) {
-        if (err) {
-            adapter.log.error('Existing ports error:' + err);
-        } else {
-            var NrOfPorts = ports.length - 1;
-
-            if (NrOfPorts == -1) {
-                adapter.log.error('No device found: Please check your Serialport setting and your Gateway')
+    return new Promise((resolve, reject) => {
+        sP.list((err, ports) => {
+            if (err) {
+                reject(`could not enumerate serial ports: ${err}`);
+                return;
             } else {
-                for (NrOfPorts; NrOfPorts >= 0; NrOfPorts--) {
-                    var portName = ports[NrOfPorts]['comName'];
-                    if(platform == 'linux'){
-                        var isUSB = portName.match(/ttyUSB/g)
-                        if(isUSB){
-                            result.push(portName);
-                        }
-                    }else {
-                        result.push(portName);
-                    }
+                if (ports == null || ports.length === 0) {
+                    reject('No device found: Please check your Serialport setting and your gateway');
+                    return;
                 }
-
-                adapter.log.info(result);
+    
+                // extract the port names
+                let result = ports.map(p => p.comName);
+                // on linux filter the ports by type
+                if (platform === 'linux') {
+                    // device can be a USB stick (ttyUSBx) or EnoceanPi gpio header (ttyAMAx)
+                    result = result.filter(p => p.match(/tty(USB|AMA)/g));
+                }
+    
+                resolve(result);
+                return;
             }
-        }
+        });
     });
 
-}
-function listSerial(){
-    adapter.log.info(result);
-    return result;
-    result =[];
 }
 
 eo.on("data",function(data){
