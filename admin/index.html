@@ -45,8 +45,8 @@
                 .append(
                     $('<option value="">')
                         .text(_('Select port'))
-                    )
-                ;
+                )
+            ;
             for (var j = 0; j < list.length; j++) {
                 if (list[j].comName === 'Not available') {
                     dropdown.append(
@@ -56,9 +56,9 @@
                     break;
                 } else {
                     dropdown.append(
-                        $('<option ' + ((element.val() === list[j].comName) ? 'selected' : '') + '>')
-                            .attr('value', list[j].comName)
-                            .text(list[j].comName)
+                        $('<option ' + ((element.val() === list[j]) ? 'selected' : '') + '>')
+                            .attr('value', list[j])
+                            .text(list[j])
                     );
                 }
             }

@@ -57,9 +57,9 @@ var adapter = utils.adapter({
 });
 
 var eo      = require("node-enocean")();
+var sP      = require("serialport");
 
-var path;
-var fs;
+
 
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', function (callback) {
@@ -136,13 +136,39 @@ adapter.on('message', function (obj) {
 // is called when databases are connected and adapter received configuration.
 // start here!
 adapter.on('ready', function () {
+    getSerial();
     main();
 
 
 });
 
 function main() {
-    eo.listen(adapter.config.serialport);
+    //Check if port exists and start listening
+    var port;
+    sP.list(function(err, ports){
+        if(err){
+            adapter.log.error('Existing ports error:' + err);
+        }else {
+            var NrOfPorts = ports.length -1;
+
+            if(NrOfPorts == -1){
+                adapter.log.error('No device found: Please check your Serialport setting and your Gateway')
+            }else {
+                for (NrOfPorts; NrOfPorts >= 0; NrOfPorts--) {
+                    var portName = ports[NrOfPorts]['comName'];
+                    if (portName = adapter.config.serialport) {
+                        adapter.log.debug('Found Serialport and start listening');
+                        eo.listen(adapter.config.serialport);
+                        break;
+                    } else {
+                        adapter.log.error('No USB device found: Please check your Serialport setting and your USB Gateway');
+                    }
+                    adapter.log.debug('Existing ports: ' + portName);
+                }
+            }
+        }
+    });
+
 
 }
 
@@ -256,41 +282,33 @@ eo.on("known-data",function(data) {
     });
 });
 
-function filterSerialPorts(path) {
-    // get only USB port names
-    if (!(/ttyUSB/).test(path)) return false;
-    // TODO: if UART devices should be supported, use these 2 lines instead of the 2 above:
-    // get only serial port names
-    // if (!(/(tty(S|ACM|USB|AMA|MFD)|rfcomm)/).test(path)) return false;
+var result =[];
+function getSerial(){
 
-    return fs
-        .statSync(path)
-        .isCharacterDevice();
+    sP.list(function(err, ports) {
+        if (err) {
+            adapter.log.error('Existing ports error:' + err);
+        } else {
+            var NrOfPorts = ports.length - 1;
+
+            if (NrOfPorts == -1) {
+                adapter.log.error('No device found: Please check your Serialport setting and your Gateway')
+            } else {
+                for (NrOfPorts; NrOfPorts >= 0; NrOfPorts--) {
+                    var portName = ports[NrOfPorts]['comName'];
+                    result.push(portName);
+                }
+
+                adapter.log.info(result);
+            }
+        }
+    });
+
 }
-
-function listSerial() {
-    path = path || require('path');
-    fs = fs || require('fs');
-
-    // Filter out the devices that aren't serial ports
-    var devDirName = '/dev';
-
-    var result;
-    try {
-        result = fs
-            .readdirSync(devDirName)
-            .map(function (file) {
-                return path.join(devDirName, file);
-            })
-            .filter(filterSerialPorts)
-            .map(function (port) {
-                return { comName: port };
-            });
-    } catch (e) {
-        adapter.log.error('Cannot read "' + devDirName + '": ' + e);
-        result = [];
-    }
+function listSerial(){
+    adapter.log.info(result);
     return result;
+    result =[];
 }
 
 eo.on("data",function(data){
