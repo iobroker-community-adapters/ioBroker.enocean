@@ -85,7 +85,7 @@ adapter.on('message', async function (obj) {
             case "listSerial":
                 // enumerate serial ports for admin interface
                 try {
-                    const ports = await enumSerialPorts();
+                    const ports = await listSerial();
                     respond({ error: null, result: ports });
                 } catch (e) {
                     respond({ error: e, result: ['Not available'] });
