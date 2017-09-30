@@ -24,12 +24,58 @@
 <script type="text/javascript" src="../../js/adapter-settings.js"></script>
 <script type="text/javascript" src="words.js"></script>
 
+<style type="text/css">
+    * {
+        box-sizing: border-box
+    }
+    #adapter-container {
+        font-size: initial;
+        padding: 0 0.5em;
+    }
+    #adapter-container > * {
+        width: 100%;
+    }
+    [data-role="adapter-name"] {
+        min-height: 64px;
+        padding-left: 80px;
+        vertical-align: middle;
+        background-image: url(EnOcean.png);
+        background-size: 64px auto;
+        background-position: left center;
+        background-repeat: no-repeat;
+    }
+    [data-role="adapter-name"]::before {
+        content: "";
+        display: inline-block;
+        height: 64px;
+        vertical-align: middle;
+    }
+    .settings-table > * {
+        display: inline-block;
+    }
+    .settings-table > label {
+        width: 15%;
+        white-space: nowrap;
+        padding-right: 1em;
+    }		
+    .settings-table > label ~ span {
+        font-size: 80%;
+    }
+
+    #manageDevices:not(.active) > .active {
+        display: none;
+    }
+
+</style>
 
 <!-- you have to define 2 functions in the global scope: -->
 <script type="text/javascript">
 
     // remember the onChange handler
     var _onChange;
+
+    var namespace = "enocean." + instance;
+    var namespaceLen = namespace.length;
 
 
     function getComPorts() {
@@ -91,6 +137,19 @@
         // Populate the dropdown for USB/COM ports instead of
         getComPorts();
 
+        // subscribe to changes
+        socket.emit("subscribeStates", namespace + ".*");
+
+        // bind UI elements
+        $("#addDevice").click(function () {
+            // activate learn mode on click on the button
+            socket.emit("setState", namespace + ".info.learnMode", {
+                val: 1, /* learn */
+                ack: false
+            });
+        });
+
+        // Signal to admin, that no changes yet
         onChange(false);
     }
 
@@ -110,29 +169,51 @@
         callback(obj);
     }
 
+    // react to changes
+    socket.on("stateChange", function (id, state) {
+        // only watch our own states
+        if (id.substring(0, namespaceLen) !== namespace) return;
+
+        if (id.match(/\.info\.learnMode$/)) {
+            // learn mode was updated
+            var container = $("#manageDevices");
+            var learnButton = $("#addDevice");
+            switch (state.val) {
+                case 0: // idle
+                    // enable the button and hide the message
+                    container.toggleClass("active", false);
+                    learnButton.attr("disabled", null);
+                    break;
+                case 1: // learning
+                    // disable the button and show the message
+                    container.toggleClass("active", true);
+                    learnButton.attr("disabled", "disabled");
+                    break;
+            }
+        }
+    });
+
 </script>
 
 <!-- you have to put your config page in a div with id adapter-container -->
 <div id="adapter-container">
 
-    <table><tr>
-        <td><img src="EnOcean.png"/></td>
-        <td><h3 class="translate">EnOcean adapter settings</h3></td>
-    </tr>
-        <tr>
-            <td><label for="teachMode" class="translate">teachIn</label></td>
-            <td><input class="value" id="teachMode" type="checkbox"/></td>
-        </tr>
-        <tr>
-            <td><label for="timeout" class="translate">Timeout</label></td>
-            <td><input class="value" id="timeout" type="text"/></td>
-        </tr>
-        <tr>
-            <td><label for="serialport" class="translate">Serial port:</label></td>
-            <td><input class="value" id="serialport" type="text" /></td>
-        </tr>
-    </table>
-    <p class="translate">on save adapter restarts with new config immediately</p>
+    <h3 class="translate" data-role="adapter-name">EnOcean adapter settings</h3>
+
+    <h4 class="translate">Settings</h4>
+    <p class="settings-table">
+        <label for="timeout" class="translate">Timeout</label>
+        <input class="value" id="timeout" type="number" min="1" max="600" /><br />
+
+        <label for="serialport" class="translate">Serial port:</label>
+        <input class="value" id="serialport" type="text" />
+    </p>
+
+    <h4 class="translate">Manage devices</h4>
+    <p id="manageDevices">
+        <button class="translate" id="addDevice">add device</button>
+        <span class="translate active">please wait...</span>
+    </p>
 
 </div>
 
