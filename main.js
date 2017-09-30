@@ -5,50 +5,126 @@
 // you have to require the utils module and call adapter function
 var utils =    require(__dirname + '/lib/utils'); // Get common adapter utils
 
+const eo = require("node-enocean")();
+const sP = require("serialport");
+const os = require("os");
+const path = require("path");
+const fs = require("fs");
+
+const platform = os.platform();
+
+// dictionary (id => obj) of all known devices
+const devices = {};
+
 // you have to call the adapter function and pass a options object
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
 // adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
-var adapter = utils.adapter({
+const adapter = utils.adapter({
     name: 'enocean',
+    ready: main,
 });
 
-var eo      = require("node-enocean")();
-var sP      = require("serialport");
-var os      = require('os');
+// is called when databases are connected and adapter received configuration.
+// start here!
+async function main() {
+    // Sicherstellen, dass die instanceObjects aus io-package.json korrekt angelegt sind
+    ensureInstanceObjects();
 
-var platform = os.platform();
-//adapter.log.info('OS: ' + platform);
+    // Eigene Objekte/States beobachten
+    adapter.subscribeStates("*");
+    adapter.subscribeObjects("*");
 
-// is called when adapter shuts down - callback has to be called under any circumstances!
-adapter.on('unload', function (callback) {
+    // existierende Objekte einlesen
+    adapter.getDevices((err, result) => {
+        if (result != null) {
+            for (const item of result) {
+                const id = item._id.substr(adapter.namespace.length + 1);
+                devices[id] = item.value;
+            }
+        }
+    });
+
+    // EnOcean-Treiber starten
+    adapter.setState("info.connection", false, true);
+    //Check if configured port exists and start listening
     try {
-        adapter.log.info('cleaned everything up...');
-        callback();
+        const availablePorts = await listSerial();
+        if (availablePorts.indexOf(adapter.config.serialport) > -1) {
+            adapter.log.debug('Found Serialport and start listening');
+            eo.listen(adapter.config.serialport);
+        } else {
+            throw new Error("Configured serial port is not available. Please check your Serialport setting and your USB Gateway.");            
+        }
     } catch (e) {
+        adapter.log.error(e);
+    }
+}
+
+eo.on("ready", (data) => {
+    adapter.setState("info.connection", true, true);
+
+    // set timeout from config
+    eo.timeout = adapter.config.timeout; // seconds
+});
+    
+    
+// is called when adapter shuts down - callback has to be called under any circumstances!
+adapter.on('unload', (callback) => {
+    try {
+        adapter.setState("info.connection", false, true);
+        // Treiber beenden
+        eo.close();
+    } catch (e) {
+    } finally {
+        // callback has to be called under any circumstances!
         callback();
     }
 });
 
 // is called if a subscribed object changes
-adapter.on('objectChange', function (id, obj) {
-    // Warning, obj can be null if it was deleted
-    adapter.log.info('objectChange ' + id + ' ' + JSON.stringify(obj));
-});
+adapter.on('objectChange', (id, obj) => {
 
-// is called if a subscribed state changes
-adapter.on('stateChange', function (id, state) {
-    // Warning, state can be null if it was deleted
-    adapter.log.info('stateChange ' + id + ' ' + JSON.stringify(state));
+    if (id.startsWith(adapter.namespace)) {
+        // this is our own object.
 
-    // you can use the ack flag to detect if it is status (true) or command (false)
-    if (state && !state.ack) {
-        adapter.log.info('ack is not set!');
+        if (obj) {
+            // remember the object
+            if (obj.type === "device") {
+                devices[id] = obj;
+            }
+        } else {
+            // object deleted, forget it
+            if (id in devices) delete devices[id];
+        }
+
     }
 
 });
 
+// is called if a subscribed state changes
+adapter.on('stateChange', (id, state) => {
+    if (state && !state.ack && id.startsWith(adapter.namespace)) {
+        // our own state was changed from within ioBroker, react to it
+        if (id.endsWith(".learnMode")) {
+            if (learnMode === "learning" && state.val !== 1 /* learning */) {
+                stopLearning();
+            } else if (learnMode === "forgetting" && state.val !== 2 /* forgetting */) {
+                stopForgetting();
+            }
+
+            if (learnMode !== "learning" && state.val === 1 /* learning */) {
+                startLearning();
+            } else if (learnMode !== "forgetting" && state.val === 2 /* forgetting */) {
+                adapter.log.warn("Forgetting devices is currently not supported due to a bug in the node-enocean package!");
+                adapter.setState(id, 0, true); // fall back to idle
+                //startForgetting();
+            }
+        }
+    }
+});
+
 // Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
-adapter.on('message', async function (obj) {
+adapter.on('message', async (obj) => {
 
     // responds to the adapter that sent the original message
     function respond(response) {
@@ -61,17 +137,17 @@ adapter.on('message', async function (obj) {
         OK: { error: null, result: 'ok' },
         ERROR_UNKNOWN_COMMAND: { error: 'Unknown command!' },
         ERROR_NOT_RUNNING: { error: 'EnOcean driver is not running!' },
-        MISSING_PARAMETER: function (paramName) {
-            return { error: 'missing parameter "' + paramName + '"!' };
+        MISSING_PARAMETER: (paramName) => {
+            return { error: `missing parameter "${paramName}"!` };
         },
         COMMAND_RUNNING: { error: 'command running' }
     };
     // make required parameters easier
     function requireParams(params) {
         if (!(params && params.length)) return true;
-        for (var i = 0; i < params.length; i++) {
-            if (!(obj.message && obj.message.hasOwnProperty(params[i]))) {
-                respond(predefinedResponses.MISSING_PARAMETER(params[i]));
+        for (const param of params) {
+            if (!(obj.message && obj.message.hasOwnProperty(param))) {
+                respond(predefinedResponses.MISSING_PARAMETER(param));
                 return false;
             }
         }
@@ -96,53 +172,83 @@ adapter.on('message', async function (obj) {
 
 });
 
-// is called when databases are connected and adapter received configuration.
-// start here!
-adapter.on('ready', function () {
-    main();
-});
-
-async function main() {
-    //Check if configured port exists and start listening
-    try {
-        const availablePorts = await listSerial();
-        if (availablePorts.indexOf(adapter.config.serialport) > -1) {
-            adapter.log.debug('Found Serialport and start listening');
-            eo.listen(adapter.config.serialport);
-        } else {
-            throw new Error("Configured serial port is not available. Please check your Serialport setting and your USB Gateway.");            
-        }
-    } catch (e) {
-        adapter.log.error(e);
-    }
+// ===============================
+// Manage learning modes
+let learnMode = "idle"; // default to not learning
+function startLearning() {
+    adapter.log.info(`Learn mode activated for ${adapter.config.timeout} seconds`);
+    learnMode = "learning";
+    adapter.setState("info.learnMode", 1 /* learning */, true);
+    eo.startLearning();
 }
 
-eo.on("ready", function(data){
-    //Start Teach mode if activated in setting
-    if(adapter.config.teachMode === true){
-        eo.startLearning();
-        //eo.timeout=adapter.config.timeout;
-        adapter.log.debug('Teach mode activated for ' + adapter.config.timeout + ' seconds');
-        teachModeCounter();
-    }
-});
-
-function teachModeCounter(){
-    var x = adapter.config.timeout;
-    setTimeout(function(){
-        adapter.extendForeignObject('system.adapter.' + adapter.namespace, {native: {teachMode: false}});
-        adapter.log.info('Teach mode deactivated');
-    }, x*1000)
+function stopLearning() {
+    learnMode = "idle";
+    adapter.setState("info.learnMode", 0 /* idle */, true);
+    eo.stopLearning();
 }
 
-eo.on("learned",function(data){
+function startForgetting() {
+    adapter.log.info(`Forget mode activated for ${adapter.config.timeout} seconds`);
+    learnMode = "forgetting";
+    adapter.setState("info.learnMode", 2 /* forgetting */, true);
+    eo.startForgetting();
+}
+
+function stopForgetting() {
+    learnMode = "idle";
+    adapter.setState("info.learnMode", 0 /* idle */, true);
+    eo.stopForgetting();
+}
+
+// gets called when the learn mode ends
+eo.on("learn-mode-stop", (obj) => {
+    adapter.log.info('Learn mode deactivated');
+    learnMode = "idle";
+    adapter.setState("info.learnMode", 0 /* idle */, true);
+});
+
+// gets called when the forget mode ends
+eo.on("forget-mode-stop", (obj) => {
+    adapter.log.info('Forget mode deactivated');
+    learnMode = "idle";
+    adapter.setState("info.learnMode", 0 /* idle */, true);
+});
+
+// gets called when a new device is registered
+eo.on("learned", (data) => {
     adapter.log.info('New device registered: ' + JSON.stringify(data));
-    if(adapter.config.teachMode === true){
-        eo.startLearning();
-    }
+    // TODO: create device states (?)
 });
 
-eo.on("known-data",function(data) {
+// gets called when a device is forgotten
+eo.on("forgotten", (data) => {
+    // delete the device in ioBroker
+    const deviceId = data.id;
+    if (deviceId in devices) {
+        adapter.log.debug(`deleting device and state ${deviceId}`);
+        // delete all states
+        adapter.getStatesOf(deviceId, (err, result) => {
+            adapter.log.debug(`got all states of ${deviceId}. err=${JSON.stringify(err)}, result=${JSON.stringify(result)}`);
+            if (result != null) {
+                for (const state of result) {
+                    adapter.log.debug(`deleting ${state._id}`);
+                    adapter.delState(state._id, () => {
+                        adapter.delObject(state._id);
+                    })
+                }
+            }
+            // and delete the device itself
+            adapter.log.debug(`deleting ${deviceId}`);
+            adapter.deleteDevice(deviceId);
+        });
+    }
+    adapter.log.info('Device forgotten: ' + JSON.stringify(data));
+});
+
+// ===============================
+
+eo.on("known-data", (data) => {
     adapter.log.debug('Recived data that are known: ' + JSON.stringify(data));
     var senderID = data['senderId'];
     var rssi = data['rssi'];
@@ -203,11 +309,11 @@ eo.on("known-data",function(data) {
         var unit = "";
         var desc = "";
         try {
-            unit = data['data'][k]['unit']
+            unit = data['data'][k]['unit'];
         } catch (err) {
         }
         try {
-            desc = data['data'][k]['desc']
+            desc = data['data'][k]['desc'];
         } catch (err) {
         }
         var varValue = data['data'][k]['value'];
@@ -256,6 +362,22 @@ async function listSerial() {
 
 }
 
-eo.on("data",function(data){
-    //adapter.log.debug('Recived data: ' + JSON.stringify(data));
-});
+// Workaround für unvollständige Adapter-Upgrades
+function ensureInstanceObjects() {
+    // read io-package.json
+    const ioPack = JSON.parse(
+        fs.readFileSync(path.join(__dirname, "io-package.json"), "utf8"),
+    );
+
+    if (ioPack.instanceObjects == null || ioPack.instanceObjects.length === 0) return;
+
+    // make sure all instance objects exist
+    for (const obj of ioPack.instanceObjects) {
+        adapter.setObjectNotExists(obj._id, obj, (err) => {
+            // and set their default value
+            if (err == null && obj.common != null && obj.common.def != null) {
+                adapter.setState(obj._id, obj.common.def, true);
+            }
+        });
+    }
+}

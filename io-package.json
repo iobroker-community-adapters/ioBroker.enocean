@@ -41,11 +41,51 @@
         "messagebox": true
     },
     "native": {
-        "teachMode": false,
         "timeout": 60,
         "serialport": ""
     },
     "objects": [
 
+    ],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": "Adapter-Information"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": "Whether the driver is connected to the device",
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        },        
+        {
+            "_id": "info.learnMode",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Whether the driver is learning or forgetting new devices",
+                "type": "number",
+                "read": true,
+                "write": true,
+                "def": 0,
+                "states": {
+                    "0": "idle",
+                    "1": "learning",
+                    "2": "forgetting"
+                }
+            },
+            "native": {}
+        }
     ]
 }
