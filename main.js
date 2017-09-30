@@ -13,6 +13,9 @@ const fs = require("fs");
 
 const platform = os.platform();
 
+// dictionary (id => obj) of all known devices
+const devices = {};
+
 // you have to call the adapter function and pass a options object
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
 // adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
@@ -29,7 +32,17 @@ async function main() {
 
     // Eigene Objekte/States beobachten
     adapter.subscribeStates("*");
-    adapter.subscribeObjects("*");    
+    adapter.subscribeObjects("*");
+
+    // existierende Objekte einlesen
+    adapter.getDevices((err, result) => {
+        if (result != null) {
+            for (const item of result) {
+                const id = item._id.substr(adapter.namespace.length + 1);
+                devices[id] = item.value;
+            }
+        }
+    });
 
     // EnOcean-Treiber starten
     adapter.setState("info.connection", false, true);
@@ -70,8 +83,22 @@ adapter.on('unload', (callback) => {
 
 // is called if a subscribed object changes
 adapter.on('objectChange', (id, obj) => {
-    // Warning, obj can be null if it was deleted
-    // adapter.log.debug('objectChange ' + id + ' ' + JSON.stringify(obj));
+
+    if (id.startsWith(adapter.namespace)) {
+        // this is our own object.
+
+        if (obj) {
+            // remember the object
+            if (obj.type === "device") {
+                devices[id] = obj;
+            }
+        } else {
+            // object deleted, forget it
+            if (id in devices) delete devices[id];
+        }
+
+    }
+
 });
 
 // is called if a subscribed state changes
@@ -88,7 +115,9 @@ adapter.on('stateChange', (id, state) => {
             if (learnMode !== "learning" && state.val === 1 /* learning */) {
                 startLearning();
             } else if (learnMode !== "forgetting" && state.val === 2 /* forgetting */) {
-                startForgetting();
+                adapter.log.warn("Forgetting devices is currently not supported due to a bug in the node-enocean package!");
+                adapter.setState(id, 0, true); // fall back to idle
+                //startForgetting();
             }
         }
     }
@@ -147,43 +176,43 @@ adapter.on('message', async (obj) => {
 // Manage learning modes
 let learnMode = "idle"; // default to not learning
 function startLearning() {
-    adapter.log.debug(`Learn mode activated for ${adapter.config.timeout} seconds`);
+    adapter.log.info(`Learn mode activated for ${adapter.config.timeout} seconds`);
     learnMode = "learning";
-    adapter.setState("learnMode", 1 /* learning */, true);
+    adapter.setState("info.learnMode", 1 /* learning */, true);
     eo.startLearning();
 }
 
 function stopLearning() {
     learnMode = "idle";
-    adapter.setState("learnMode", 0 /* idle */, true);
+    adapter.setState("info.learnMode", 0 /* idle */, true);
     eo.stopLearning();
 }
 
 function startForgetting() {
-    adapter.log.debug(`Forget mode activated for ${adapter.config.timeout} seconds`);
+    adapter.log.info(`Forget mode activated for ${adapter.config.timeout} seconds`);
     learnMode = "forgetting";
-    adapter.setState("learnMode", 2 /* forgetting */, true);
+    adapter.setState("info.learnMode", 2 /* forgetting */, true);
     eo.startForgetting();
 }
 
 function stopForgetting() {
     learnMode = "idle";
-    adapter.setState("learnMode", 0 /* idle */, true);
+    adapter.setState("info.learnMode", 0 /* idle */, true);
     eo.stopForgetting();
 }
 
 // gets called when the learn mode ends
 eo.on("learn-mode-stop", (obj) => {
-    adapter.log.info('Teach mode deactivated');
+    adapter.log.info('Learn mode deactivated');
     learnMode = "idle";
-    adapter.setState("learnMode", 0 /* idle */, true);
+    adapter.setState("info.learnMode", 0 /* idle */, true);
 });
 
 // gets called when the forget mode ends
 eo.on("forget-mode-stop", (obj) => {
     adapter.log.info('Forget mode deactivated');
     learnMode = "idle";
-    adapter.setState("learnMode", 0 /* idle */, true);
+    adapter.setState("info.learnMode", 0 /* idle */, true);
 });
 
 // gets called when a new device is registered
@@ -192,10 +221,29 @@ eo.on("learned", (data) => {
     // TODO: create device states (?)
 });
 
-// gets called when a new device is registered
+// gets called when a device is forgotten
 eo.on("forgotten", (data) => {
+    // delete the device in ioBroker
+    const deviceId = data.id;
+    if (deviceId in devices) {
+        adapter.log.debug(`deleting device and state ${deviceId}`);
+        // delete all states
+        adapter.getStatesOf(deviceId, (err, result) => {
+            adapter.log.debug(`got all states of ${deviceId}. err=${JSON.stringify(err)}, result=${JSON.stringify(result)}`);
+            if (result != null) {
+                for (const state of result) {
+                    adapter.log.debug(`deleting ${state._id}`);
+                    adapter.delState(state._id, () => {
+                        adapter.delObject(state._id);
+                    })
+                }
+            }
+            // and delete the device itself
+            adapter.log.debug(`deleting ${deviceId}`);
+            adapter.deleteDevice(deviceId);
+        });
+    }
     adapter.log.info('Device forgotten: ' + JSON.stringify(data));
-    // TODO: delete device states (?)
 });
 
 // ===============================
@@ -325,6 +373,11 @@ function ensureInstanceObjects() {
 
     // make sure all instance objects exist
     for (const obj of ioPack.instanceObjects) {
-        adapter.setObjectNotExists(obj._id, obj);
+        adapter.setObjectNotExists(obj._id, obj, (err) => {
+            // and set their default value
+            if (err == null && obj.common != null && obj.common.def != null) {
+                adapter.setState(obj._id, obj.common.def, true);
+            }
+        });
     }
 }

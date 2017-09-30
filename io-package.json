@@ -70,7 +70,7 @@
             "native": {}
         },        
         {
-            "_id": "learnMode",
+            "_id": "info.learnMode",
             "type": "state",
             "common": {
                 "role": "state",
