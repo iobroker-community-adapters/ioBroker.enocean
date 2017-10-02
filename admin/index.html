@@ -148,6 +148,19 @@
                 ack: false
             });
         });
+        $("#removeDevice").click(function () {
+            // activate forget mode on click on the button
+            socket.emit("setState", namespace + ".info.learnMode", {
+                val: 2, /* forget */
+                ack: false
+            });
+        });
+        // check for current state of the learn mode
+        socket.emit("getState", namespace + ".info.learnMode", function (err, state) {
+            if (err == null && state != null) {
+                updateLearnMode(state.val);
+            }
+        })
 
         // Signal to admin, that no changes yet
         onChange(false);
@@ -174,24 +187,39 @@
         // only watch our own states
         if (id.substring(0, namespaceLen) !== namespace) return;
 
-        if (id.match(/\.info\.learnMode$/)) {
-            // learn mode was updated
-            var container = $("#manageDevices");
-            var learnButton = $("#addDevice");
-            switch (state.val) {
-                case 0: // idle
-                    // enable the button and hide the message
-                    container.toggleClass("active", false);
-                    learnButton.attr("disabled", null);
-                    break;
-                case 1: // learning
-                    // disable the button and show the message
-                    container.toggleClass("active", true);
-                    learnButton.attr("disabled", "disabled");
-                    break;
+        if (state != null) {
+            if (id.match(/\.info\.learnMode$/)) {
+                updateLearnMode(state.val);
             }
         }
     });
+
+    function updateLearnMode(value) {
+        // learn mode was updated
+        var container = $("#manageDevices");
+        var learnButton = $("#addDevice");
+        var forgetButton = $("#removeDevice");
+        switch (value) {
+            case 0: // idle
+                // enable the buttons and hide the message
+                container.toggleClass("active", false);
+                learnButton.attr("disabled", null);
+                forgetButton.attr("disabled", null);
+                break;
+            case 1: // learning
+                // disable the button and show the message
+                container.toggleClass("active", true);
+                learnButton.attr("disabled", "disabled");
+                forgetButton.attr("disabled", null);
+                break;
+            case 2: // forgetting
+                // disable the button and show the message
+                container.toggleClass("active", true);
+                learnButton.attr("disabled", null);
+                forgetButton.attr("disabled", "disabled");
+                break;
+        }
+    }
 
 </script>
 
@@ -212,6 +240,7 @@
     <h4 class="translate">Manage devices</h4>
     <p id="manageDevices">
         <button class="translate" id="addDevice">add device</button>
+        <button class="translate" id="removeDevice">remove device</button>
         <span class="translate active">please wait...</span>
     </p>
 
