@@ -115,9 +115,7 @@ adapter.on('stateChange', (id, state) => {
             if (learnMode !== "learning" && state.val === 1 /* learning */) {
                 startLearning();
             } else if (learnMode !== "forgetting" && state.val === 2 /* forgetting */) {
-                adapter.log.warn("Forgetting devices is currently not supported due to a bug in the node-enocean package!");
-                adapter.setState(id, 0, true); // fall back to idle
-                //startForgetting();
+                startForgetting();
             }
         }
     }
