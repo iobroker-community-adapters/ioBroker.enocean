@@ -1,8 +1,16 @@
 {
     "common": {
         "name": "enocean",
-        "version": "0.1.0",
+        "version": "0.1.1",
         "news": {
+            "0.1.1": {
+                "en": "alpha version",
+                "de": "Alphaversion",
+                "ru": "Альфа-версия",
+                "pt": "versión alfa",
+                "fr": "version alpha",
+                "nl": "alfaversie"
+            },
             "0.1.0": {
                 "en": "alpha version",
                 "de": "Alphaversion",

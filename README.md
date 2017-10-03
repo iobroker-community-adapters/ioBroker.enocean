@@ -2,12 +2,18 @@
 # ioBroker.enocean
 =================
 
-This adapter is a template for the creation of an ioBroker adapter. You do not need it at least that you plan developing your own adapter.
+####IMPORTANT: Node 8.x+ needed!
 
-It includes both code running within iobroker and as vis widget. If you only plan to create a vis widget then you should use the [iobroker.vis-template](https://github.com/ioBroker/ioBroker.vis-template) instead.
+Tested with USB 300 Gateway https://www.enocean.com/de/enocean_module/usb-300-oem/
 
+At this time the Adapter can only recive states.
 
 ## Changelog
+
+#### 0.1.1
+* (AlCalzone) changed teach-in mode
+* (AlCalzone) add forget mode
+* (Jey Cee) add DropDown for Serialport choose, works on Windows and Linux
 
 #### 0.1.0
 * (Jey Cee) Alpha release 
