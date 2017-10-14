@@ -276,59 +276,84 @@ eo.on("known-data", (data) => {
     adapter.setState(senderID + '.rssi', {val: rssi, ack: true});
     
     //write values transmitted by device
-    for (nrOfValues = nrOfValues - 1; nrOfValues >= 0; nrOfValues--) {
-        var name = data['values'][nrOfValues]['type'];
-        var patt = new RegExp(/\s/g);
-        name = name.replace(patt, '_');
-        var varValue = data['values'][nrOfValues]['value'];
+    if (data.values != null) {
+        for (const telegramValue of data.values) {
+            // extract the info
+            let {
+                type: name = "unknown",
+                unit = "",
+                value: varValue
+            } = telegramValue;
+            name = name.replace(/\s/g, "_");
 
-        //adapter.log.debug('Value: ' + data['values'][nrOfValues]['value']);
+            // ignore unknown values
+            if (name === "unknown" && varValue === "unknown" && unit === "unknown") continue;
 
-        adapter.setObjectNotExists(senderID + '.' + name, {
-            type: 'state',
-            common: {
-                name: name,
-                role: 'value',
-                type: 'mixed',
-                unit: data['values'][nrOfValues]['unit']
-            },
-            native: {}
-        });
-        adapter.setState(senderID + '.' + name, {val: varValue, ack: true});
+            adapter.setObjectNotExists(senderID + '.' + name, {
+                type: 'state',
+                common: {
+                    name: name,
+                    role: 'value',
+                    type: 'mixed',
+                    unit: unit
+                },
+                native: {}
+            });
+            adapter.setState(senderID + '.' + name, {val: varValue, ack: true});
+        }
     }
 
     //write data transmitted by device
-    Object.keys(data['data']).forEach(function (k) {
-        //adapter.log.info(k + ' - ' + data['data'][k]);
-        var key = k;
-        var name = data['data'][k]['name'];
-        var patt = new RegExp(/\s/g);
-        name = name.replace(patt, '_');
-        var unit = "";
-        var desc = "";
-        try {
-            unit = data['data'][k]['unit'];
-        } catch (err) {
+    if (data.data != null) {
+        for (const key of Object.keys(data.data)) {
+            // extract the info
+            let {
+                name = "unknown",
+                unit = "",
+                desc = "",
+                value: varValue
+            } = data.data[key];
+            name = name.replace(/\s/g, "_");
+    
+            adapter.setObjectNotExists(senderID + '.' + key, {
+                type: 'state',
+                common: {
+                    name: name,
+                    role: 'value',
+                    type: 'mixed',
+                    unit: unit,
+                    desc: desc
+                },
+                native: {}
+            });
+            adapter.setState(senderID + '.' + key, {val: varValue, ack: true});
         }
-        try {
-            desc = data['data'][k]['desc'];
-        } catch (err) {
-        }
-        var varValue = data['data'][k]['value'];
-
-        adapter.setObjectNotExists(senderID + '.' + key, {
-            type: 'state',
-            common: {
-                name: name,
-                role: 'value',
-                type: 'mixed',
-                unit: unit,
-                desc: desc
-            },
-            native: {}
+    } else {
+        // MSC telegrams have no data attribute
+        let {
+            manufacturerid: manufacturerID,
+            packetTypeString: packetType,
+            raw: varValue
+        } = data;
+        const objNative = { manufacturerID, packetType };
+        const objId = `${senderID}.raw`;
+        // also store some additional info about the packet, so try to get the object
+        adapter.getObject(objId, (obj) => {
+            if (obj == null || JSON.stringify(obj.native) !== JSON.stringify(objNative)) {
+                // set or update the object
+                adapter.setObject(objId, {
+                    type: 'state',
+                    common: {
+                        name: 'raw telegram',
+                        role: 'value',
+                        type: 'string'
+                    },
+                    native: objNative
+                });
+            }
+            adapter.setState(objId, {val: varValue, ack: true});    
         });
-        adapter.setState(senderID + '.' + key, {val: varValue, ack: true});
-    });
+    }
 });
 
 async function listSerial() {
@@ -364,7 +389,7 @@ async function listSerial() {
 function ensureInstanceObjects() {
     // read io-package.json
     const ioPack = JSON.parse(
-        fs.readFileSync(path.join(__dirname, "io-package.json"), "utf8"),
+        fs.readFileSync(path.join(__dirname, "io-package.json"), "utf8")
     );
 
     if (ioPack.instanceObjects == null || ioPack.instanceObjects.length === 0) return;
