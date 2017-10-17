@@ -42,19 +42,29 @@
         "icon": "EnOcean.png",
         "enabled": true,
         "extIcon": "https://raw.githubusercontent.com/jey-cee/ioBroker.enocean/master/admin/EnOcean.png",
-        "keywords": ["EnOcean", "vis", "GUI", "graphical", "scada"],
+        "keywords": [
+            "EnOcean",
+            "vis",
+            "GUI",
+            "graphical",
+            "scada"
+        ],
         "readme": "https://github.com/jey-cee/ioBroker.enocean/blob/master/README.md",
         "loglevel": "info",
         "type": "hardware",
-        "messagebox": true
+        "messagebox": true,
+        "authors": [
+            {
+                "name": "Jey Cee",
+                "email": "jey-cee@live.com"
+            }
+        ]
     },
     "native": {
         "timeout": 60,
         "serialport": ""
     },
-    "objects": [
-
-    ],
+    "objects": [],
     "instanceObjects": [
         {
             "_id": "info",
@@ -76,7 +86,7 @@
                 "def": false
             },
             "native": {}
-        },        
+        },
         {
             "_id": "info.learnMode",
             "type": "state",
