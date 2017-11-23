@@ -1,15 +1,15 @@
 /* jshint -W097 */// jshint strict:false
 /*jslint node: true */
-"use strict";
+'use strict';
 
 // you have to require the utils module and call adapter function
-var utils =    require(__dirname + '/lib/utils'); // Get common adapter utils
+const utils = require(__dirname + '/lib/utils'); // Get common adapter utils
 
-const eo = require("node-enocean")();
-const sP = require("serialport");
-const os = require("os");
-const path = require("path");
-const fs = require("fs");
+const eo = require('node-enocean')();
+const sP = require('serialport');
+const os = require('os');
+const path = require('path');
+const fs = require('fs');
 
 const platform = os.platform();
 
@@ -31,12 +31,12 @@ async function main() {
     ensureInstanceObjects();
 
     // Eigene Objekte/States beobachten
-    adapter.subscribeStates("*");
-    adapter.subscribeObjects("*");
+    adapter.subscribeStates('*');
+    adapter.subscribeObjects('*');
 
     // existierende Objekte einlesen
     adapter.getDevices((err, result) => {
-        if (result != null) {
+        if (result) {
             for (const item of result) {
                 const id = item._id.substr(adapter.namespace.length + 1);
                 devices[id] = item.value;
@@ -45,7 +45,7 @@ async function main() {
     });
 
     // EnOcean-Treiber starten
-    adapter.setState("info.connection", false, true);
+    adapter.setState('info.connection', false, true);
     //Check if configured port exists and start listening
     try {
         const availablePorts = await listSerial();
@@ -53,15 +53,15 @@ async function main() {
             adapter.log.debug('Found Serialport and start listening');
             eo.listen(adapter.config.serialport);
         } else {
-            throw new Error("Configured serial port is not available. Please check your Serialport setting and your USB Gateway.");            
+            throw new Error('Configured serial port is not available. Please check your Serialport setting and your USB Gateway.');            
         }
     } catch (e) {
         adapter.log.error(e);
     }
 }
 
-eo.on("ready", (data) => {
-    adapter.setState("info.connection", true, true);
+eo.on('ready', (/* data */) => {
+    adapter.setState('info.connection', true, true);
 
     // set timeout from config
     eo.timeout = adapter.config.timeout; // seconds
@@ -71,8 +71,8 @@ eo.on("ready", (data) => {
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', (callback) => {
     try {
-        adapter.setState("info.connection", false, true);
-        // Treiber beenden
+        adapter.setState('info.connection', false, true);
+        // End driver
         eo.close();
     } catch (e) {
     } finally {
@@ -89,7 +89,7 @@ adapter.on('objectChange', (id, obj) => {
 
         if (obj) {
             // remember the object
-            if (obj.type === "device") {
+            if (obj.type === 'device') {
                 devices[id] = obj;
             }
         } else {
@@ -105,16 +105,16 @@ adapter.on('objectChange', (id, obj) => {
 adapter.on('stateChange', (id, state) => {
     if (state && !state.ack && id.startsWith(adapter.namespace)) {
         // our own state was changed from within ioBroker, react to it
-        if (id.endsWith(".learnMode")) {
-            if (learnMode === "learning" && state.val !== 1 /* learning */) {
+        if (id.endsWith('.learnMode')) {
+            if (learnMode === 'learning' && state.val !== 1 /* learning */) {
                 stopLearning();
-            } else if (learnMode === "forgetting" && state.val !== 2 /* forgetting */) {
+            } else if (learnMode === 'forgetting' && state.val !== 2 /* forgetting */) {
                 stopForgetting();
             }
 
-            if (learnMode !== "learning" && state.val === 1 /* learning */) {
+            if (learnMode !== 'learning' && state.val === 1 /* learning */) {
                 startLearning();
-            } else if (learnMode !== "forgetting" && state.val === 2 /* forgetting */) {
+            } else if (learnMode !== 'forgetting' && state.val === 2 /* forgetting */) {
                 startForgetting();
             }
         }
@@ -130,7 +130,7 @@ adapter.on('message', async (obj) => {
             adapter.sendTo(obj.from, obj.command, response, obj.callback);
     }
     // some predefined responses so we only have to define them once
-    var predefinedResponses = {
+    const predefinedResponses = {
         ACK: { error: null },
         OK: { error: null, result: 'ok' },
         ERROR_UNKNOWN_COMMAND: { error: 'Unknown command!' },
@@ -156,7 +156,7 @@ adapter.on('message', async (obj) => {
     // handle the message
     if (obj) {
         switch (obj.command) {
-            case "listSerial":
+            case 'listSerial':
                 // enumerate serial ports for admin interface
                 try {
                     const ports = await listSerial();
@@ -172,55 +172,55 @@ adapter.on('message', async (obj) => {
 
 // ===============================
 // Manage learning modes
-let learnMode = "idle"; // default to not learning
+let learnMode = 'idle'; // default to not learning
 function startLearning() {
     adapter.log.info(`Learn mode activated for ${adapter.config.timeout} seconds`);
-    learnMode = "learning";
-    adapter.setState("info.learnMode", 1 /* learning */, true);
+    learnMode = 'learning';
+    adapter.setState('info.learnMode', 1 /* learning */, true);
     eo.startLearning();
 }
 
 function stopLearning() {
-    learnMode = "idle";
-    adapter.setState("info.learnMode", 0 /* idle */, true);
+    learnMode = 'idle';
+    adapter.setState('info.learnMode', 0 /* idle */, true);
     eo.stopLearning();
 }
 
 function startForgetting() {
     adapter.log.info(`Forget mode activated for ${adapter.config.timeout} seconds`);
-    learnMode = "forgetting";
-    adapter.setState("info.learnMode", 2 /* forgetting */, true);
+    learnMode = 'forgetting';
+    adapter.setState('info.learnMode', 2 /* forgetting */, true);
     eo.startForgetting();
 }
 
 function stopForgetting() {
-    learnMode = "idle";
-    adapter.setState("info.learnMode", 0 /* idle */, true);
+    learnMode = 'idle';
+    adapter.setState('info.learnMode', 0 /* idle */, true);
     eo.stopForgetting();
 }
 
 // gets called when the learn mode ends
-eo.on("learn-mode-stop", (obj) => {
+eo.on('learn-mode-stop', (obj) => {
     adapter.log.info('Learn mode deactivated');
-    learnMode = "idle";
-    adapter.setState("info.learnMode", 0 /* idle */, true);
+    learnMode = 'idle';
+    adapter.setState('info.learnMode', 0 /* idle */, true);
 });
 
 // gets called when the forget mode ends
-eo.on("forget-mode-stop", (obj) => {
+eo.on('forget-mode-stop', (obj) => {
     adapter.log.info('Forget mode deactivated');
-    learnMode = "idle";
-    adapter.setState("info.learnMode", 0 /* idle */, true);
+    learnMode = 'idle';
+    adapter.setState('info.learnMode', 0 /* idle */, true);
 });
 
 // gets called when a new device is registered
-eo.on("learned", (data) => {
+eo.on('learned', (data) => {
     adapter.log.info('New device registered: ' + JSON.stringify(data));
     // TODO: create device states (?)
 });
 
 // gets called when a device is forgotten
-eo.on("forgotten", (data) => {
+eo.on('forgotten', (data) => {
     // delete the device in ioBroker
     const deviceId = data.id;
     if (deviceId in devices) {
@@ -228,7 +228,7 @@ eo.on("forgotten", (data) => {
         // delete all states
         adapter.getStatesOf(deviceId, (err, result) => {
             adapter.log.debug(`got all states of ${deviceId}. err=${JSON.stringify(err)}, result=${JSON.stringify(result)}`);
-            if (result != null) {
+            if (result) {
                 for (const state of result) {
                     adapter.log.debug(`deleting ${state._id}`);
                     adapter.delState(state._id, () => {
@@ -246,13 +246,13 @@ eo.on("forgotten", (data) => {
 
 // ===============================
 
-eo.on("known-data", (data) => {
+eo.on('known-data', (data) => {
     adapter.log.debug('Recived data that are known: ' + JSON.stringify(data));
-    var senderID = data['senderId'];
-    var rssi = data['rssi'];
-    var sensor = data['sensor'];
-    var nrOfValues = data['values'].length;
-    var nrOfData = data['sensor'].length;
+    const senderID = data['senderId'];
+    const rssi     = data['rssi'];
+    const sensor   = data['sensor'];
+    // var nrOfValues = data['values'].length;
+    // var nrOfData = data['sensor'].length;
 
 
     adapter.setObjectNotExists(senderID, {
@@ -276,18 +276,18 @@ eo.on("known-data", (data) => {
     adapter.setState(senderID + '.rssi', {val: rssi, ack: true});
     
     //write values transmitted by device
-    if (data.values != null) {
+    if (data.values) {
         for (const telegramValue of data.values) {
             // extract the info
             let {
-                type: name = "unknown",
-                unit = "",
+                type: name = 'unknown',
+                unit = '',
                 value: varValue
             } = telegramValue;
-            name = name.replace(/\s/g, "_");
+            name = name.replace(/\s/g, '_');
 
             // ignore unknown values
-            if (name === "unknown" && varValue === "unknown" && unit === "unknown") continue;
+            if (name === 'unknown' && varValue === 'unknown' && unit === 'unknown') continue;
 
             adapter.setObjectNotExists(senderID + '.' + name, {
                 type: 'state',
@@ -304,16 +304,16 @@ eo.on("known-data", (data) => {
     }
 
     //write data transmitted by device
-    if (data.data != null) {
+    if (data.data) {
         for (const key of Object.keys(data.data)) {
             // extract the info
             let {
-                name = "unknown",
-                unit = "",
-                desc = "",
+                name = 'unknown',
+                unit = '',
+                desc = '',
                 value: varValue
             } = data.data[key];
-            name = name.replace(/\s/g, "_");
+            name = name.replace(/\s/g, '_');
     
             adapter.setObjectNotExists(senderID + '.' + key, {
                 type: 'state',
@@ -339,7 +339,7 @@ eo.on("known-data", (data) => {
         const objId = `${senderID}.raw`;
         // also store some additional info about the packet, so try to get the object
         adapter.getObject(objId, (obj) => {
-            if (obj == null || JSON.stringify(obj.native) !== JSON.stringify(objNative)) {
+            if (!obj || JSON.stringify(obj.native) !== JSON.stringify(objNative)) {
                 // set or update the object
                 adapter.setObject(objId, {
                     type: 'state',
@@ -362,9 +362,8 @@ async function listSerial() {
         sP.list((err, ports) => {
             if (err) {
                 reject(`could not enumerate serial ports: ${err}`);
-                return;
             } else {
-                if (ports == null || ports.length === 0) {
+                if (!ports || ports.length === 0) {
                     reject('No device found: Please check your Serialport setting and your gateway');
                     return;
                 }
@@ -378,7 +377,6 @@ async function listSerial() {
                 }
     
                 resolve(result);
-                return;
             }
         });
     });
@@ -389,16 +387,16 @@ async function listSerial() {
 function ensureInstanceObjects() {
     // read io-package.json
     const ioPack = JSON.parse(
-        fs.readFileSync(path.join(__dirname, "io-package.json"), "utf8")
+        fs.readFileSync(path.join(__dirname, 'io-package.json'), 'utf8')
     );
 
-    if (ioPack.instanceObjects == null || ioPack.instanceObjects.length === 0) return;
+    if (ioPack.instanceObjects === null || ioPack.instanceObjects.length === 0) return;
 
     // make sure all instance objects exist
     for (const obj of ioPack.instanceObjects) {
         adapter.setObjectNotExists(obj._id, obj, (err) => {
             // and set their default value
-            if (err == null && obj.common != null && obj.common.def != null) {
+            if (!err && obj.common && obj.common.def !== null && obj.common.def !== undefined) {
                 adapter.setState(obj._id, obj.common.def, true);
             }
         });

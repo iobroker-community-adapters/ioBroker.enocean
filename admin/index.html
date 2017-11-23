@@ -1,5 +1,5 @@
 <html>
-
+<head>
 <!-- these 4 files always have to be included -->
 <link rel="stylesheet" type="text/css" href="../../lib/css/themes/jquery-ui/redmond/jquery-ui.min.css"/>
 <script type="text/javascript" src="../../lib/js/jquery-1.11.1.min.js"></script>
@@ -74,13 +74,14 @@
     // remember the onChange handler
     var _onChange;
 
-    var namespace = "enocean." + instance;
+    var namespace    = 'enocean.' + instance;
     var namespaceLen = namespace.length;
-
+    var countdown    = 0;
+    var countTimer   = null;
 
     function getComPorts() {
         sendTo(null, 'listSerial', null, function (list) {
-            if (list == null || list.result == null) {
+            if (!list || !list.result) {
                 return;
             }
             list = list.result;
@@ -119,7 +120,7 @@
         // example: select elements with id=key and class=value and insert value
         if (!settings) return;
         $('.value').each(function () {
-            var key = $(this).attr('id');
+            var key  = $(this).attr('id');
             var $key = $('#' + key + '.value');
             if ($key.attr('type') === 'checkbox') {
                 $key.prop('checked', settings[key]).change(function() {
@@ -138,29 +139,27 @@
         getComPorts();
 
         // subscribe to changes
-        socket.emit("subscribeStates", namespace + ".*");
+        socket.emit('subscribeStates', namespace + '.info.*');
 
         // bind UI elements
-        $("#addDevice").click(function () {
+        $('#addDevice').click(function () {
             // activate learn mode on click on the button
-            socket.emit("setState", namespace + ".info.learnMode", {
+            socket.emit('setState', namespace + '.info.learnMode', {
                 val: 1, /* learn */
                 ack: false
             });
         });
-        $("#removeDevice").click(function () {
+        $('#removeDevice').click(function () {
             // activate forget mode on click on the button
-            socket.emit("setState", namespace + ".info.learnMode", {
+            socket.emit('setState', namespace + '.info.learnMode', {
                 val: 2, /* forget */
                 ack: false
             });
         });
         // check for current state of the learn mode
-        socket.emit("getState", namespace + ".info.learnMode", function (err, state) {
-            if (err == null && state != null) {
-                updateLearnMode(state.val);
-            }
-        })
+        socket.emit('getState', namespace + '.info.learnMode', function (err, state) {
+            state && updateLearnMode(state.val);
+        });
 
         // Signal to admin, that no changes yet
         onChange(false);
@@ -183,47 +182,76 @@
     }
 
     // react to changes
-    socket.on("stateChange", function (id, state) {
+    socket.on('stateChange', function (id, state) {
         // only watch our own states
         if (id.substring(0, namespaceLen) !== namespace) return;
 
-        if (state != null) {
+        if (state) {
             if (id.match(/\.info\.learnMode$/)) {
                 updateLearnMode(state.val);
+            } else if (id.match(/\.info\.lastLearned/)) {
+                $('#lastInfo').html(state.val);
+            }  else if (id.match(/\.info\.lastForgotten/)) {
+                $('#lastInfo').html(state.val);
             }
         }
     });
 
     function updateLearnMode(value) {
         // learn mode was updated
-        var container = $("#manageDevices");
-        var learnButton = $("#addDevice");
-        var forgetButton = $("#removeDevice");
+        var container    = $('#manageDevices');
+        var learnButton  = $('#addDevice');
+        var forgetButton = $('#removeDevice');
         switch (value) {
             case 0: // idle
+                if (countTimer) {
+                    clearInterval(countTimer);
+                    $('#countdown').html('');
+                    countTimer = null;
+                }
                 // enable the buttons and hide the message
-                container.toggleClass("active", false);
-                learnButton.attr("disabled", null);
-                forgetButton.attr("disabled", null);
+                container.toggleClass('active', false);
+                learnButton.prop('disabled', false);
+                forgetButton.prop('disabled', false);
                 break;
             case 1: // learning
                 // disable the button and show the message
-                container.toggleClass("active", true);
-                learnButton.attr("disabled", "disabled");
-                forgetButton.attr("disabled", null);
+                container.toggleClass('active', true);
+                learnButton.prop('disabled', true);
+                forgetButton.prop('disabled', true);
+                countdown = 60;
+                countTimer = setInterval(function () {
+                    countTimer = null;
+                    countdown--;
+                    $('#countdown').html(_('Learn device in the next %s seconds', countdown));
+                    if (countdown <= 0) {
+                        clearInterval(countTimer);
+                        countTimer = null;
+                    }
+                }, 1000);
                 break;
             case 2: // forgetting
                 // disable the button and show the message
-                container.toggleClass("active", true);
-                learnButton.attr("disabled", null);
-                forgetButton.attr("disabled", "disabled");
+                container.toggleClass('active', true);
+                learnButton.prop('disabled', true);
+                forgetButton.prop('disabled', true);
+                countdown = 60;
+                countTimer = setInterval(function () {
+                    countTimer = null;
+                    countdown--;
+                    $('#countdown').html(_('Unlearn device in the next %s seconds', countdown));
+                    if (countdown <= 0) {
+                        clearInterval(countTimer);
+                        countTimer = null;
+                    }
+                }, 1000);
                 break;
         }
     }
 
 </script>
-
-<!-- you have to put your config page in a div with id adapter-container -->
+</head>
+<body>
 <div id="adapter-container">
 
     <h3 class="translate" data-role="adapter-name">EnOcean adapter settings</h3>
@@ -241,9 +269,10 @@
     <p id="manageDevices">
         <button class="translate" id="addDevice">add device</button>
         <button class="translate" id="removeDevice">remove device</button>
-        <span class="translate active">please wait...</span>
+        <span class="translate active" id="countdown">please wait...</span>
+        <div id="lastInfo"></div>
     </p>
 
 </div>
-
+</body>
 </html>
