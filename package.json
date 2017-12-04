@@ -6,6 +6,9 @@
     "name": "Jey Cee",
     "email": "jey-cee@live.com"
   },
+  "engines": {
+    "node": ">=8.0"
+  },
   "contributors": [
     {
       "name": "Jey Cee",
