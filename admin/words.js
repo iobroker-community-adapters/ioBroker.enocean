@@ -25,5 +25,10 @@ systemDictionary = {
     "on save adapter restarts with new config immediately": {
         "de": "Beim Speichern von Einstellungen der Adapter wird sofort neu gestartet.",
         "ru": "При сохранении настроек адаптера он сразу же перезапускается"
+    },
+    "Devices": {
+        "en": "Devices",
+        "de": "Geräte",
+        "ru": "Devices"
     }
 };

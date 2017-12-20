@@ -50,7 +50,7 @@ async function main() {
     try {
         const availablePorts = await listSerial();
         if (availablePorts.indexOf(adapter.config.serialport) > -1) {
-            adapter.log.debug('Found Serialport and start listening');
+            adapter.log.debug('Found Serialport and start listening on ' + adapter.config.serialport.toString());
             eo.listen(adapter.config.serialport);
         } else {
             throw new Error('Configured serial port is not available. Please check your Serialport setting and your USB Gateway.');            
@@ -164,6 +164,14 @@ adapter.on('message', async (obj) => {
                 } catch (e) {
                     respond({ error: e, result: ['Not available'] });
                 }
+                break;
+            case 'deleteButton':
+                adapter.log.debug("Try to delete " + JSON.stringify(obj.message.deviceID));
+                eo.forget(obj.message.deviceID);
+                respond(predefinedResponses.OK);
+                break;
+            default:
+                adapter.log.info("Received unhandled message: " + obj.command);
                 break;
         }
     }
@@ -373,7 +381,8 @@ async function listSerial() {
                 // on linux filter the ports by type
                 if (platform === 'linux') {
                     // device can be a USB stick (ttyUSBx) or EnoceanPi gpio header (ttyAMAx)
-                    result = result.filter(p => p.match(/tty(USB|AMA)/g));
+                    //result = result.filter(p => p.match(/tty(USB|AMA)/g));
+                    result = result.filter(p => p.match(/tty/g));  // new style: symlinks should be selectable.
                 }
     
                 resolve(result);
