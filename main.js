@@ -16,6 +16,9 @@ const platform = os.platform();
 // dictionary (id => obj) of all known devices
 const devices = {};
 
+// trabslation matrix
+const translationMatrix = require("./lib/EEP2IOB.json")
+
 // you have to call the adapter function and pass a options object
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
 // adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
@@ -96,9 +99,7 @@ adapter.on('objectChange', (id, obj) => {
             // object deleted, forget it
             if (id in devices) delete devices[id];
         }
-
     }
-
 });
 
 // is called if a subscribed state changes
@@ -165,10 +166,18 @@ adapter.on('message', async (obj) => {
                     respond({ error: e, result: ['Not available'] });
                 }
                 break;
-            case 'deleteButton':
+            case 'delete':
                 adapter.log.debug("Try to delete " + JSON.stringify(obj.message.deviceID));
                 eo.forget(obj.message.deviceID);
-                respond(predefinedResponses.OK);
+                break;
+            case 'addDevice':
+                adapter.log.debug("Received add message: " + JSON.stringify(obj));
+                eo.learn({
+                    id: obj.message.deviceID,
+                    eep: obj.message.eep,
+                    desc: obj.message.desc,
+                    manufacturer: obj.message.manufacturer  
+                });
                 break;
             default:
                 adapter.log.info("Received unhandled message: " + obj.command);
@@ -224,7 +233,94 @@ eo.on('forget-mode-stop', (obj) => {
 // gets called when a new device is registered
 eo.on('learned', (data) => {
     adapter.log.info('New device registered: ' + JSON.stringify(data));
-    // TODO: create device states (?)
+
+    // check, if a EEP translation matrix is available
+    var eepEntry = translationMatrix[data['eep']];
+
+    if (eepEntry != undefined) {
+        // create the object provided by the translation matrix
+        var descEntry = eepEntry.desc[data['desc']];
+
+        if (descEntry != undefined) {
+            // a valid entry has been found
+            var eepType = eo.eepDesc[data['eep']];
+
+            adapter.setObjectNotExists(data['id'], {
+                type: 'device',
+                common: {
+                    name: data['id']
+                },
+                native: {
+                    id: data['id'],
+                    eep: data['eep'],
+                    manufacturer: data['manufacturer'],
+                    desc: data['desc'],
+                    eepType: eepType
+                }
+            });
+
+            // all devices have this entry, which is provided by the gateway
+            adapter.setObjectNotExists(data['id'] + '.rssi', {
+                type: 'state',
+                common: {
+                    name: 'Signal Strength',
+                    role: 'value.rssi',
+                    type: 'number'
+                },
+                native: {}
+            });
+
+            var varObjects = descEntry.iobObjects;
+            for (var variable in varObjects) {
+                var entriesToCreate = descEntry.iobObjects[variable];
+                adapter.setObjectNotExists(data['id'] + '.' + entriesToCreate['id'], {
+                    type: 'state',
+                    common: {
+                        name: entriesToCreate['common.name'],
+                        type: entriesToCreate['common.type'],
+                        min: entriesToCreate['common.min'],
+                        max: entriesToCreate['common.max'],
+                        def: entriesToCreate['common.def']
+                    }, native: {}
+                });
+
+            }
+
+            devices[data['id']] = data;
+
+        } else {
+            // The description hasn't been found. This should not happen and a warning has to be issued.
+            adapter.log.warn('The EEP has been found, but the description [' + data['desc'] + '] has not.');
+        }
+    } else {
+        // use the values provided by the enocean library.
+        adapter.setObjectNotExists(data['id'], {
+            type: 'device',
+            common: {
+                name: data['id']
+            },
+            native: {
+                id: data['id'],
+                eep: data['eep'],
+                manufacturer: data['manufacturer'],
+                desc: data['desc'],
+                eepType: eepType
+            }
+        });
+
+        // all devices have this entry, which is provided by the gateway
+        adapter.setObjectNotExists(data['id'] + '.rssi', {
+            type: 'state',
+            common: {
+                name: 'Signal Strength',
+                role: 'value.rssi',
+                type: 'number'
+            },
+            native: {}
+        });
+
+        // TODO: get additional data from the EnOcean library to create the states.
+    }
 });
 
 // gets called when a device is forgotten

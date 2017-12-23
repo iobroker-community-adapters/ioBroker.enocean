@@ -1,0 +1,21 @@
+{
+  "f6-02-01": {
+    "desc": {
+      "native": {
+        "iobObjects": [
+          {"id": "R1_AI","common.name": "R1.AI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false"},
+          {"id": "R1_AO","common.name": "R1.AO","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false"},
+          {"id": "R1_BI","common.name": "R1.BI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false"},
+          {"id": "R1_BO","common.name": "R1.BO","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false"},
+          {"id": "R2_AI","common.name": "R2.AI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false"},
+          {"id": "R2_AO","common.name": "R2.AO","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false"},
+          {"id": "R2_BI","common.name": "R2.BI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false"},
+          {"id": "R2_BO","common.name": "R2.BO","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false"}
+        ]
+      },
+      "SmokeDetector.1": {
+
+      }
+    }
+  }
+}

@@ -98,6 +98,15 @@
         #manageDevices:not(.active) > .active {
             display: none;
         }
+
+        .label-class {
+            display: block;
+            width: 150px;
+            float: left;
+            text-align: right;
+            padding-right: 10px;
+            clear: left;
+        }
     </style>
 
     <!-- you have to define 2 functions in the global scope: -->
@@ -111,12 +120,19 @@
         var countdown = 0;
         var countTimer = null;
         var devices = {};
+        var addDeviceDialog;
 
         var deviceCommands = {
             "Edit": {},
             "------------": {},
-            "deleteButton": {}
+            "delete": {}
         };
+
+        var enoceanCommands = {
+            "addDevice": {}
+        }
+
+
 
         function getComPorts() {
             sendTo(null, 'listSerial', null, function (list) {
@@ -204,18 +220,10 @@
 
             text += '</select></td>';
 
-            if (devices[obj._id]) {
-                var $tr = $('tr[data-id="' + obj.native.id + '"]');
-                $tr.html(text);
-                $('#tabs-2').animate({
-                    scrollTop: $tr.offset().top
-                }, 500);
-            } else {
-                text = '<tr class="device ' + (isFirst ? '' : 'highlight') + '" data-id="' + obj.native.id + '">' + text + '</tr>';
-                $('#devices').append(text);
-            }
+            text = '<tr class="device ' + (isFirst ? '' : 'highlight') + '" data-id="' + obj.native.id + '">' + text + '</tr>';
+            $('#devices').append(text);
 
-            devices[obj._id] = obj;
+            devices[obj.id] = obj;
 
             var $op = $('.node-operations[data-id="' + obj.native.id + '"]');
 
@@ -281,7 +289,7 @@
 
             $('#tabs').show().tabs({
                 activate: function (event, ui) {
-                    if (ui.newPanel.attr('id') !== 'tabs-1') {
+                    if (ui.newPanel.attr('id') !== 'tabs-1') { // TODO
                         //                        if (initialCom !== $('#usb').val()) {
                         //                            showMessage(_('First save settings'));
                         //                            $('#tabs').tabs({ active: 0 });
@@ -292,6 +300,7 @@
 
             // subscribe to changes
             socket.emit('subscribeStates', namespace + '.info.*');
+            socket.emit('subscribeObjects', namespace + '.*'); // seems, this doesn't work. 
 
             // bind UI elements
             $('#addDevice').click(function () {
@@ -328,6 +337,76 @@
                 });
             });
 
+            $('.enocean-operations').each(function () {
+                $(this).button({
+                    icons: { primary: 'ui-icon-custom-' + $(this).data('icon'), secondary: null }
+                }).button('enable').click(function () {
+                    addDeviceDialog.dialog("open");
+                });
+            });
+
+            addDeviceDialog = $("#dialog-form").dialog({
+                autoOpen: false,
+                height: 500,
+                width: 500,
+                modal: true,
+                buttons: {
+                    "Create a device": function () {
+                        var data = { deviceID: $("#id").val().toLowerCase(), eep: $("#eep").val().toLowerCase(), manufacturer : $("#manufacturer").val(), desc : $("#desc").val()};
+                        sendTo(null, "addDevice", data, function (result) {
+                            if (result && result.error) {
+                                showMessage(result.error, _('Error'), 'alert');
+                            }
+                        });
+                        addDeviceDialog.dialog("close");
+                    },
+                    Cancel: function () {
+                        addDeviceDialog.dialog("close");
+                    }
+                },
+                close: function () {
+                }
+            });
+
+            // react to object changes e.g. adding or deleting a device
+            socket.on('objectChange', function (id, obj) {
+                if (id.substring(0, namespaceLen) !== namespace) return;
+                console.log("Object change announced: " + id + " and obj = " + JSON.stringify(obj));
+                if (!obj) {
+                    if (devices[id]) {
+                        $('tr[data-id="' + devices[id].native.id + '"]').remove();
+                        console.log('Device deleted: ' + id);
+                        delete devices[id];
+                    }
+                } else {
+                    if (obj.type === 'device' && obj.native) {
+                        if (devices[id]) {
+                            console.log('Device changed: ' + id + ': ' + JSON.stringify(obj.native));
+                        } else {
+                            console.log('New device: ' + id + ': ' + JSON.stringify(obj.native));
+                            devices[id] = obj;
+                        }
+                        showDevice(obj);
+                    }
+                }
+            });
+
+            // react to changes
+            socket.on('stateChange', function (id, state) {
+                // only watch our own states
+                if (id.substring(0, namespaceLen) !== namespace) return;
+                console.log("State change announced: " + id + " and obj = " + JSON.stringify(state));
+
+                if (state) {
+                    if (id.match(/\.info\.learnMode$/)) {
+                        updateLearnMode(state.val);
+                    } else if (id.match(/\.info\.lastLearned/)) {
+                        $('#lastInfo').html(state.val);
+                    } else if (id.match(/\.info\.lastForgotten/)) {
+                        $('#lastInfo').html(state.val);
+                    }
+                }
+            });
 
             // Signal to admin, that no changes yet
             onChange(false);
@@ -348,48 +427,6 @@
             });
             callback(obj);
         }
-
-        // react to changes
-        socket.on('stateChange', function (id, state) {
-            // only watch our own states
-            if (id.substring(0, namespaceLen) !== namespace) return;
-
-            if (state) {
-                if (id.match(/\.info\.learnMode$/)) {
-                    updateLearnMode(state.val);
-                } else if (id.match(/\.info\.lastLearned/)) {
-                    $('#lastInfo').html(state.val);
-                } else if (id.match(/\.info\.lastForgotten/)) {
-                    $('#lastInfo').html(state.val);
-                }
-            }
-        });
-
-        var _namespace = 'enocean.' + instance + '.';
-        var _nlen = _namespace.length;
-
-        // react to object changes e.g. adding or deleting a device
-        socket.on('objectChange', function (id, obj) {
-            adapter.log.debug("Object change announced: " + id);
-            if (id.substring(0, _nlen) !== _namespace) return;
-            if (!obj) {
-                if (devices[id]) {
-                    $('tr[data-id="' + devices[id].native.deviceID + '"]').remove();
-                    console.log('Device deleted: ' + id);
-                    delete devices[id];
-                }
-            } else {
-                if (obj.type === 'device' && obj.native) {
-                    if (devices[id]) {
-                        console.log('Device changed: ' + id + ': ' + JSON.stringify(obj.native));
-                    } else {
-                        console.log('New device: ' + id + ': ' + JSON.stringify(obj.native));
-                    }
-                    showDevice(obj);
-                }
-            }
-        });
-
 
 
         function updateLearnMode(value) {
@@ -447,43 +484,78 @@
     </script>
 </head>
 <body>
-    <div id="adapter-container">
 
+    <div id="dialog-form" title="Create new device" style="display:none;">
+        <p class="validateTips">ID and EEP are mandatory.</p>
+
+        <form>
+            <fieldset>
+                <div>
+                    <label for="id" class="label-class">ID</label>
+                    <input type="text" name="id" id="id" value="" class="text ui-widget-content ui-corner-all">
+                </div>
+                <div>
+                    <label for="eep" class="label-class">EEP</label>
+                    <input type="text" name="eep" id="eep" value="xx-xx-xx" class="text ui-widget-content ui-corner-all">
+                </div>
+                <div>
+                    <label for="manufacturer" class="label-class">Manufacturer</label>
+                    <input type="text" name="manufacturer" id="manufacturer" value="unknown" class="text ui-widget-content ui-corner-all">
+                </div>
+                <div>
+                    <label for="desc" class="label-class">Description</label>
+                    <input type="text" name="desc" id="desc" value="native" class="text ui-widget-content ui-corner-all">
+                </div>
+
+                <!-- Allow form submission with keyboard without duplicating the dialog button -->
+                <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+            </fieldset>
+        </form>
+    </div>
+
+
+    <div id="adapter-container">
         <table>
             <tr>
                 <td style="padding-top: 20px;padding-left: 10px"><h3 class="translate" data-role="adapter-name">EnOcean adapter settings</h3></td>
             </tr>
         </table>
 
-
         <div id="tabs" style="width: 100%; height: calc(100% - 70px); overflow: hidden; display: none;">
             <ul>
-                <li><a href="#tabs-1" class="translate">Settings</a></li>
+                <li><a href="#tabs-1" class="translate">Options</a></li>
                 <li><a href="#tabs-2" class="translate">Devices</a></li>
             </ul>
 
             <div id="tabs-1">
-                <h4 class="translate">Settings</h4>
-                <p class="settings-table">
-                    <label for="timeout" class="translate">Timeout</label>
-                    <input class="value" id="timeout" type="number" min="1" max="600" /><br />
-
-                    <label for="serialport" class="translate">Serial port:</label>
-                    <input class="value" id="serialport" type="text" />
-                </p>
-
-                <h4 class="translate">Manage devices</h4>
-                <p id="manageDevices">
-                    <button class="translate" id="addDevice">add device</button>
-                    <button class="translate" id="removeDevice">remove device</button>
-                    <span class="translate active" id="countdown">please wait...</span>
-                    <div id="lastInfo"></div>
-                </p>
+                <table>
+                    <tbody>
+                        <tr><td class="line" colspan="2"> </td></tr>
+                        <tr>
+                            <td><label for="serialport" class="translate">Serial port:</label></td>
+                            <td class="admin-icon"></td>
+                            <td><input class="value" id="serialport" type="text" /></td>
+                        </tr>
+                        <tr><td class="line" colspan="2"> </td></tr>
+                        <tr>
+                            <td><label for="timeout" class="translate">Timeout</label></td>
+                            <td class="admin-icon"></td>
+                            <td><input class="value" id="timeout" type="number" min="1" max="600" /></td>
+                        </tr>
+                        <tr><td class="line" colspan="2"> </td></tr>
+                    </tbody>
+                </table>
             </div>
 
             <div id="tabs-2" style="width: 100%; height: calc(100% - 40px); overflow-x: hidden; overflow-y: auto; padding: 0; margin: 10px">
                 <p>
-                    <button data-operation="addDevice" data-icon="add" class="translate zwave-operations">Add device</button>
+                    <button data-operation="addDevice" data-icon="add" class="translate enocean-operations">Add device</button>
+                <p id="manageDevices">
+                    <button class="translate" id="addDevice">automatic detect device</button>
+                    <button class="translate" id="removeDevice">automatic remove device</button>
+                    <span class="translate active" id="countdown">please wait...</span>
+                    <div id="lastInfo"></div>
+                </p>
                 </p>
                 <div id="message" style="height: 20px;"></div>
                 <div id="helper" style="height: 20px; width: calc(100% - 40px); text-align: right"></div>
@@ -502,5 +574,6 @@
             </div>
         </div>
     </div>
+
 </body>
 </html>
