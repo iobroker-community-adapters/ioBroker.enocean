@@ -13,8 +13,12 @@
           {"id": "R2_BO","common.name": "R2.BO","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false"}
         ]
       },
-      "SmokeDetector.1": {
-
+      "smokedetector_1": {
+        "iobObjects": [
+          {"id": "keep_alive","common.name": "Keep Alive","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false", "common.role": "indicator.alive"},
+          {"id": "alarm","common.name": "Alarm","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false", "common.role": "switch"},
+          {"id": "battery_status","common.name": "Battery Status","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false", "common.role": "indicator"}
+        ]
       }
     }
   }

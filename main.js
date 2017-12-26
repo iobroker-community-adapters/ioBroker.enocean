@@ -16,8 +16,11 @@ const platform = os.platform();
 // dictionary (id => obj) of all known devices
 const devices = {};
 
-// trabslation matrix
-const translationMatrix = require("./lib/EEP2IOB.json")
+// translation matrix
+const translationMatrix = require('./eep/EEP2IOB.json');
+
+// translation functions
+var eepTranslation = require('./eep/eepInclude.js');
 
 // you have to call the adapter function and pass a options object
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
@@ -40,11 +43,11 @@ async function main() {
     // existierende Objekte einlesen
     adapter.getDevices((err, result) => {
         if (result) {
-            for (const item of result) {
-                const id = item._id.substr(adapter.namespace.length + 1);
-                devices[id] = item.value;
+            for (const item in result) {
+                const id = result[item]._id.substr(adapter.namespace.length + 1);
+                devices[id] = result[item];
             }
-        }
+          }
     });
 
     // EnOcean-Treiber starten
@@ -56,7 +59,7 @@ async function main() {
             adapter.log.debug('Found Serialport and start listening on ' + adapter.config.serialport.toString());
             eo.listen(adapter.config.serialport);
         } else {
-            throw new Error('Configured serial port is not available. Please check your Serialport setting and your USB Gateway.');            
+            throw new Error('Configured serial port is not available. Please check your Serialport setting and your USB Gateway.');
         }
     } catch (e) {
         adapter.log.error(e);
@@ -69,8 +72,8 @@ eo.on('ready', (/* data */) => {
     // set timeout from config
     eo.timeout = adapter.config.timeout; // seconds
 });
-    
-    
+
+
 // is called when adapter shuts down - callback has to be called under any circumstances!
 adapter.on('unload', (callback) => {
     try {
@@ -176,7 +179,7 @@ adapter.on('message', async (obj) => {
                     id: obj.message.deviceID,
                     eep: obj.message.eep,
                     desc: obj.message.desc,
-                    manufacturer: obj.message.manufacturer  
+                    manufacturer: obj.message.manufacturer
                 });
                 break;
             default:
@@ -235,15 +238,15 @@ eo.on('learned', (data) => {
     adapter.log.info('New device registered: ' + JSON.stringify(data));
 
     // check, if a EEP translation matrix is available
-    var eepEntry = translationMatrix[data['eep']];
+    var eepEntry = translationMatrix[data['eep'].toLowerCase()];
 
-    if (eepEntry != undefined) {
+    if ((eepEntry != undefined) && (eepEntry.desc[data['desc'].toLowerCase()] != undefined)){
         // create the object provided by the translation matrix
-        var descEntry = eepEntry.desc[data['desc']];
+        var descEntry = eepEntry.desc[data['desc'].toLowerCase()];
 
-        if (descEntry != undefined) {
+ //       if (descEntry != undefined) {
             // a valid entry has been found
-            var eepType = eo.eepDesc[data['eep']];
+            var eepType = eo.eepDesc[data['eep'].toLowerCase()];
 
             adapter.setObjectNotExists(data['id'], {
                 type: 'device',
@@ -280,7 +283,8 @@ eo.on('learned', (data) => {
                         type: entriesToCreate['common.type'],
                         min: entriesToCreate['common.min'],
                         max: entriesToCreate['common.max'],
-                        def: entriesToCreate['common.def']
+                        def: entriesToCreate['common.def'],
+                        role: entriesToCreate['common.role']
                     }, native: {}
                 });
 
@@ -288,10 +292,10 @@ eo.on('learned', (data) => {
 
             devices[data['id']] = data;
 
-        } else {
-            // The description hasn't been found. This should not happen and a warning has to be issued.
-            adapter.log.warn('The EEP has been found, but the description [' + data['desc'] + '] has not.');
-        }
+        //} else {
+        //    // The description hasn't been found. This should not happen and a warning has to be issued.
+        //    adapter.log.warn('The EEP has been found, but the description [' + data['desc'] + '] has not.');
+        //}
     } else {
         // use the values provided by the enocean library.
         adapter.setObjectNotExists(data['id'], {
@@ -319,7 +323,10 @@ eo.on('learned', (data) => {
             native: {}
         });
 
+        devices[data['id']] = data;
+
         // TODO: get additional data from the EnOcean library to create the states.
+        // At the moment the object shall be created at the moment the data comes in.
     }
 });
 
@@ -327,6 +334,7 @@ eo.on('learned', (data) => {
 eo.on('forgotten', (data) => {
     // delete the device in ioBroker
     const deviceId = data.id;
+    adapter.log.debug("Devices = " + JSON.stringify(devices));
     if (deviceId in devices) {
         adapter.log.debug(`deleting device and state ${deviceId}`);
         // delete all states
@@ -358,105 +366,106 @@ eo.on('known-data', (data) => {
     // var nrOfValues = data['values'].length;
     // var nrOfData = data['sensor'].length;
 
+    if (senderID in devices) {
+        adapter.log.debug("Device is known and data will be processed.");
+        adapter.setState(senderID + '.rssi', { val: rssi, ack: true });
 
-    adapter.setObjectNotExists(senderID, {
-        type: 'device',
-        common: {
-            name: senderID
-        },
-        native: sensor
-    });
+        var eepEntry = sensor['eep'].toLowerCase().replace(/-/g,"_") + '_' + sensor['desc'].toLowerCase();
+        var callFunction = eepTranslation[eepEntry];
 
-    adapter.setObjectNotExists(senderID + '.rssi', {
-        type: 'state',
-        common: {
-            name: senderID + ' rssi',
-            role: 'value.rssi',
-            type: 'number'
-        },
-        native: {}
-    });
+        if (callFunction != undefined) {
+            // The return value is a map consisting of variable and value
+            var varToSet = callFunction(data);
+            adapter.log.debug("varToSet = " + JSON.stringify(varToSet));
 
-    adapter.setState(senderID + '.rssi', {val: rssi, ack: true});
-    
-    //write values transmitted by device
-    if (data.values) {
-        for (const telegramValue of data.values) {
-            // extract the info
-            let {
+            for (var key in varToSet) {
+                adapter.log.debug("Set :"  + key + " to value : " + varToSet[key]);
+                adapter.setState(senderID + '.' + key, { val: varToSet[key], ack: true });
+            }
+
+
+        } else {
+            //write values transmitted by device
+            if (data.values) {
+                for (const telegramValue of data.values) {
+                    // extract the info
+                    let {
                 type: name = 'unknown',
-                unit = '',
-                value: varValue
+                        unit = '',
+                        value: varValue
             } = telegramValue;
-            name = name.replace(/\s/g, '_');
+                    name = name.replace(/\s/g, '_');
 
-            // ignore unknown values
-            if (name === 'unknown' && varValue === 'unknown' && unit === 'unknown') continue;
+                    // ignore unknown values
+                    if (name === 'unknown' && varValue === 'unknown' && unit === 'unknown') continue;
 
-            adapter.setObjectNotExists(senderID + '.' + name, {
-                type: 'state',
-                common: {
-                    name: name,
-                    role: 'value',
-                    type: 'mixed',
-                    unit: unit
-                },
-                native: {}
-            });
-            adapter.setState(senderID + '.' + name, {val: varValue, ack: true});
-        }
-    }
-
-    //write data transmitted by device
-    if (data.data) {
-        for (const key of Object.keys(data.data)) {
-            // extract the info
-            let {
+                    adapter.setObjectNotExists(senderID + '.' + name, {
+                        type: 'state',
+                        common: {
+                            name: name,
+                            role: 'value',
+                            type: 'mixed',
+                            unit: unit
+                        },
+                        native: {}
+                    });
+                    adapter.setState(senderID + '.' + name, { val: varValue, ack: true });
+                }
+            }
+            //write data transmitted by device
+            if (data.data) {
+                for (const key of Object.keys(data.data)) {
+                    // extract the info
+                    let {
                 name = 'unknown',
-                unit = '',
-                desc = '',
-                value: varValue
+                        unit = '',
+                        desc = '',
+                        value: varValue
             } = data.data[key];
-            name = name.replace(/\s/g, '_');
-    
-            adapter.setObjectNotExists(senderID + '.' + key, {
-                type: 'state',
-                common: {
-                    name: name,
-                    role: 'value',
-                    type: 'mixed',
-                    unit: unit,
-                    desc: desc
-                },
-                native: {}
-            });
-            adapter.setState(senderID + '.' + key, {val: varValue, ack: true});
-        }
-    } else {
-        // MSC telegrams have no data attribute
-        let {
+                    name = name.replace(/\s/g, '_');
+
+                    adapter.setObjectNotExists(senderID + '.' + key, {
+                        type: 'state',
+                        common: {
+                            name: name,
+                            role: 'value',
+                            type: 'mixed',
+                            unit: unit,
+                            desc: desc
+                        },
+                        native: {}
+                    });
+                    adapter.setState(senderID + '.' + key, { val: varValue, ack: true });
+                }
+            } else {
+                // MSC telegrams have no data attribute
+                let {
             manufacturerid: manufacturerID,
-            packetTypeString: packetType,
-            raw: varValue
+                    packetTypeString: packetType,
+                    raw: varValue
         } = data;
-        const objNative = { manufacturerID, packetType };
-        const objId = `${senderID}.raw`;
-        // also store some additional info about the packet, so try to get the object
-        adapter.getObject(objId, (obj) => {
-            if (!obj || JSON.stringify(obj.native) !== JSON.stringify(objNative)) {
-                // set or update the object
-                adapter.setObject(objId, {
-                    type: 'state',
-                    common: {
-                        name: 'raw telegram',
-                        role: 'value',
-                        type: 'string'
-                    },
-                    native: objNative
+                const objNative = { manufacturerID, packetType };
+                const objId = `${senderID}.raw`;
+                // also store some additional info about the packet, so try to get the object
+                adapter.getObject(objId, (obj) => {
+                    if (!obj || JSON.stringify(obj.native) !== JSON.stringify(objNative)) {
+                        // set or update the object
+                        adapter.setObject(objId, {
+                            type: 'state',
+                            common: {
+                                name: 'raw telegram',
+                                role: 'value',
+                                type: 'string'
+                            },
+                            native: objNative
+                        });
+                    }
+                    adapter.setState(objId, { val: varValue, ack: true });
                 });
             }
-            adapter.setState(objId, {val: varValue, ack: true});    
-        });
+        }
+    } else {
+        adapter.log.warn("Received unknow device information. Data will be ignored.");
     }
 });
 
@@ -471,7 +480,7 @@ async function listSerial() {
                     reject('No device found: Please check your Serialport setting and your gateway');
                     return;
                 }
-    
+
                 // extract the port names
                 let result = ports.map(p => p.comName);
                 // on linux filter the ports by type
@@ -480,7 +489,7 @@ async function listSerial() {
                     //result = result.filter(p => p.match(/tty(USB|AMA)/g));
                     result = result.filter(p => p.match(/tty/g));  // new style: symlinks should be selectable.
                 }
-    
+
                 resolve(result);
             }
         });
