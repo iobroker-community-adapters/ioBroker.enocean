@@ -14,11 +14,11 @@ module.exports=function(telegram) {
     } else {
         // message
         var SA = data['SA'].value;
-        var R2 = data['R2'].value;
+        var R1 = data['R2'].value;
         var EB = (data['EB'].value == 1);
 
-        if ((SA == 1) && (R2 != undefined)) {
-            switch(R2) {
+        if ((SA == 0) && (R1 != undefined)) {
+            switch(R1) {
                 case 0:
                     if (EB) {
                         retValue = {alarm: false, keep_alive : true};
