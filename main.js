@@ -284,7 +284,8 @@ eo.on('learned', (data) => {
                         min: entriesToCreate['common.min'],
                         max: entriesToCreate['common.max'],
                         def: entriesToCreate['common.def'],
-                        role: entriesToCreate['common.role']
+                        role: entriesToCreate['common.role'],
+                        states: entriesToCreate['common.states']
                     }, native: {}
                 });
 
