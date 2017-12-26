@@ -26,5 +26,15 @@
         ]
       }
     }
+  },
+  "d5-00-01" : {
+    "desc": {
+      "native": {
+        "iobObjects": [
+          {"id": "contact_status","common.name": "Contact Status","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false", "common.role": "state", "common.states" : "false:closed;true:open"},
+          {"id": "learn_button","common.name": "Learn Button","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false", "common.role": "state", "common.states" : "false:not pressed;true:pressed"}
+        ]
+      }
+    }
   }
 }
