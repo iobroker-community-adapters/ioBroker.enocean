@@ -8,15 +8,16 @@ module.exports=function(data) {
 
 //    return {'rawbyte' : telegram['rawByte'][24]};
 
-  if (telegram['rawByte'][24] == '2') { // T21 and NU
+  if (telegram['rawByte'][12] == '2') { // T21 and NU
       // TODO: to be implemented
 
   } else {
       // message
-       var SA = (data['SA'].value == 1);
-       var EB = (data['EB'].value == 1);
-       var R1 = data['R1'].value;
-       var R2 = data['R2'].value;
+      var dataField = parseInt(telegram.slice(2,4), 16);
+      var SA =  dataField & 0x01;
+      var R1 = (dataField & 0xE0) >> 5;
+      var R2 = (dataField & 0x0E) >> 1;
+      var EB = ((dataField & 0x10) == 0x10);
 
        switch(R1) {
               case 0:
@@ -36,16 +37,16 @@ module.exports=function(data) {
         if (SA) {
             switch(R2) {
                  case 0:
-                     retValue['R2_AI'] = EB;
+                     retValue['R1_AI'] = EB;
                      break;
                  case 1:
-                     retValue['R2_AO'] = EB;
+                     retValue['R1_AO'] = EB;
                      break;
                  case 2:
-                     retValue['R2_BI'] = EB;
+                     retValue['R1_BI'] = EB;
                      break;
                  case 3:
-                     retValue['R2_BO'] = EB;
+                     retValue['R1_BO'] = EB;
                      break;
              }
         }

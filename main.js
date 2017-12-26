@@ -367,7 +367,6 @@ eo.on('known-data', (data) => {
     // var nrOfData = data['sensor'].length;
 
     if (senderID in devices) {
-        adapter.log.debug("Device is known and data will be processed.");
         adapter.setState(senderID + '.rssi', { val: rssi, ack: true });
 
         var eepEntry = sensor['eep'].toLowerCase().replace(/-/g,"_") + '_' + sensor['desc'].toLowerCase();
@@ -375,9 +374,8 @@ eo.on('known-data', (data) => {
 
         if (callFunction != undefined) {
             // The return value is a map consisting of variable and value
-            var varToSet = callFunction(data);
-            adapter.log.debug("varToSet = " + JSON.stringify(varToSet));
 
+            var varToSet = callFunction(data['rawByte'].slice(12,100));
             for (var key in varToSet) {
                 adapter.log.debug("Set :"  + key + " to value : " + varToSet[key]);
                 adapter.setState(senderID + '.' + key, { val: varToSet[key], ack: true });
