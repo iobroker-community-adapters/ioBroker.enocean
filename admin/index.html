@@ -123,8 +123,6 @@
         var addDeviceDialog;
 
         var deviceCommands = {
-            "Edit": {},
-            "------------": {},
             "delete": {}
         };
 
@@ -485,25 +483,25 @@
 </head>
 <body>
 
-    <div id="dialog-form" title="Create new device" style="display:none;">
-        <p class="validateTips">ID and EEP are mandatory.</p>
+    <div id="dialog-form" class="translate" title="Create new device" style="display:none;">
+        <p class="validateTips translate">ID and EEP are mandatory.</p>
 
         <form>
             <fieldset>
                 <div>
-                    <label for="id" class="label-class">ID</label>
+                    <label for="id" class="label-class translate">ID</label>
                     <input type="text" name="id" id="id" value="" class="text ui-widget-content ui-corner-all">
                 </div>
                 <div>
-                    <label for="eep" class="label-class">EEP</label>
+                    <label for="eep" class="label-class translate">EEP</label>
                     <input type="text" name="eep" id="eep" value="xx-xx-xx" class="text ui-widget-content ui-corner-all">
                 </div>
                 <div>
-                    <label for="manufacturer" class="label-class">Manufacturer</label>
+                    <label for="manufacturer" class="label-class translate">Manufacturer</label>
                     <input type="text" name="manufacturer" id="manufacturer" value="unknown" class="text ui-widget-content ui-corner-all">
                 </div>
                 <div>
-                    <label for="desc" class="label-class">Description</label>
+                    <label for="desc" class="label-class translate">Description</label>
                     <input type="text" name="desc" id="desc" value="native" class="text ui-widget-content ui-corner-all">
                 </div>
 
