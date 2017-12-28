@@ -1,8 +1,16 @@
 {
     "common": {
         "name": "enocean",
-        "version": "0.1.1",
+        "version": "0.1.2",
         "news": {
+            "0.1.2": {
+                "en": "Added device managment to adapter config; Added support for new devices: smoke detector (Eltako FRW), F6-10-00 (Hoppe window handle), EEP D5-00-01 (door/window contact)",
+                "de": "Added device managment to adapter config; Added support for new devices: smoke detector (Eltako FRW), F6-10-00 (Hoppe window handle), EEP D5-00-01 (door/window contact)",
+                "ru": "Added device managment to adapter config; Added support for new devices: smoke detector (Eltako FRW), F6-10-00 (Hoppe window handle), EEP D5-00-01 (door/window contact)",
+                "pt": "Added device managment to adapter config; Added support for new devices: smoke detector (Eltako FRW), F6-10-00 (Hoppe window handle), EEP D5-00-01 (door/window contact)",
+                "fr": "Added device managment to adapter config; Added support for new devices: smoke detector (Eltako FRW), F6-10-00 (Hoppe window handle), EEP D5-00-01 (door/window contact)",
+                "nl": "Added device managment to adapter config; Added support for new devices: smoke detector (Eltako FRW), F6-10-00 (Hoppe window handle), EEP D5-00-01 (door/window contact)"
+            },
             "0.1.1": {
                 "en": "alpha version",
                 "de": "Alphaversion",
