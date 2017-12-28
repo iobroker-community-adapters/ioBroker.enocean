@@ -1,0 +1,50 @@
+{
+  "f6-02-01": {
+    "desc": {
+      "native": {
+        "iobObjects": [
+          {"id": "R1_AI","common.name": "R1.AI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "R1_AO","common.name": "R1.AO","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "R1_BI","common.name": "R1.BI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "R1_BO","common.name": "R1.BO","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"}
+        ]
+      },
+      "smokedetector_1": {
+        "iobObjects": [
+          {"id": "keep_alive","common.name": "Keep Alive","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "indicator.alive", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "alarm","common.name": "Alarm","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "battery_status","common.name": "Battery Status","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "indicator", "common.states" : "", "common.read": "true", "common.write": "false"}
+        ]
+      }
+    }
+  },
+  "f6-10-00" : {
+    "desc": {
+      "native": {
+        "iobObjects": [
+          {"id": "window_handle","common.name": "Window Handle Status","common.type": "number","common.min": "0","common.max": "2","common.def": "0",
+            "common.role": "state", "common.states" : "0:closed;1:open;2:tilt", "common.read": "true", "common.write": "false"}
+        ]
+      }
+    }
+  },
+  "d5-00-01" : {
+    "desc": {
+      "native": {
+        "iobObjects": [
+          {"id": "contact_status","common.name": "Contact Status","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "state", "common.states" : "false:closed;true:open", "common.read": "true", "common.write": "false"},
+          {"id": "learn_button","common.name": "Learn Button","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "state", "common.states" : "false:not pressed;true:pressed", "common.read": "true", "common.write": "false"}
+        ]
+      }
+    }
+  }
+}

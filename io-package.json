@@ -104,6 +104,30 @@
                 }
             },
             "native": {}
+        },
+        {
+            "_id": "info.lastLearned",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Info about last learned device",
+                "type": "string",
+                "read": true,
+                "write": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.lastForgotten",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Info about last forgotten device",
+                "type": "string",
+                "read": true,
+                "write": false
+            },
+            "native": {}
         }
     ]
 }

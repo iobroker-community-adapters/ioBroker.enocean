@@ -7,3 +7,5 @@
 
 # npm package files
 iobroker.*.tgz
+
+package-lock.json
