@@ -268,7 +268,9 @@ eo.on('learned', (data) => {
                 common: {
                     name: 'Signal Strength',
                     role: 'value.rssi',
-                    type: 'number'
+                    type: 'number',
+                    read: true,
+                    write: false
                 },
                 native: {}
             });
@@ -285,7 +287,9 @@ eo.on('learned', (data) => {
                         max: entriesToCreate['common.max'],
                         def: entriesToCreate['common.def'],
                         role: entriesToCreate['common.role'],
-                        states: entriesToCreate['common.states']
+                        states: entriesToCreate['common.states'],
+                        read: entriesToCreate['common.read'],
+                        write: entriesToCreate['common.write']
                     }, native: {}
                 });
 
