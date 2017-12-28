@@ -10,6 +10,10 @@ At this time the Adapter can only recive states.
 
 ## Changelog
 
+#### 0.1.2
+* (Schluesselmeister) Added device managment to adapter config
+* (Schluesselmeister) Added support for new devices: smoke detector (Eltako FRW), F6-10-00 (Hoppe window handle), EEP D5-00-01 (door/window contact)
+
 #### 0.1.1
 * (AlCalzone) changed teach-in mode
 * (AlCalzone) add forget mode
