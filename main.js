@@ -25,7 +25,7 @@ var eepTranslation = require('./eep/eepInclude.js');
 // you have to call the adapter function and pass a options object
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
 // adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
-const adapter = utils.adapter({
+const adapter = utils.Adapter({
     name: 'enocean',
     ready: main,
 });
