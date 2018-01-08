@@ -37,7 +37,7 @@
   },
   "main": "main.js",
   "scripts": {
-    "test": "node node_modules/mocha/bin/mocha"
+    "test": "node node_modules/mocha/bin/mocha --exit"
   },
   "bugs": {
     "url": "https://github.com/jey-cee/ioBroker.enocean/issues"
