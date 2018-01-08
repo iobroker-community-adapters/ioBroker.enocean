@@ -9,3 +9,5 @@
 iobroker.*.tgz
 
 package-lock.json
+
+gulpfile.js

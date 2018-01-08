@@ -1,109 +1,27 @@
-// Dictionary (systemDictionary is global variable from adapter-settings.js)
-systemDictionary = {
-    "EnOcean adapter settings": {
-        "de": "EnOcean", "ru": "EnOcean"
-    },
-    "Timeout": {
-        "en": "Timeout", "de": "Timeout", "ru": "Тайм-аут"
-    },
-    "Serial port:": {
-        "de": "Schnittstelle:", "ru": "Имя USB"
-    },
-    "Select port": {
-        "de": "Port auswählen", "ru": "выбрать порт"
-    },
-    "Not available": {
-        "de": "Nicht verfügbar"
-    },
-    "add device": {
-        "de": "Gerät hinzufügen"
-    },
-    "remove device": {
-        "de": "Gerät entfernen"
-    },
+/*global systemDictionary:true */
+'use strict';
 
-    "on save adapter restarts with new config immediately": {
-        "de": "Beim Speichern von Einstellungen der Adapter wird sofort neu gestartet.",
-        "ru": "При сохранении настроек адаптера он сразу же перезапускается"
-    },
-    "Devices": {
-        "en": "Devices",
-        "de": "Geräte",
-        "ru": "Devices"
-    },
-    "ID, EEP and description are mandatory." : {
-      "en": "ID, EEP and description are mandatory.",
-      "de": "ID, EEP und die Beschreibung sind Pflichtfelder.",
-      "ru": "ID, EEP and description are mandatory."
-    },
-    "ID" : {
-      "en": "ID",
-      "de": "ID",
-      "ru": "ID"
-    },
-    "EEP" : {
-      "en": "EEP",
-      "de": "EEP",
-      "ru": "EEP"
-    },
-    "Manufacturer" : {
-      "en": "Manufacturer",
-      "de": "Hersteller",
-      "ru": "Manufacturer"
-    },
-    "Description" : {
-      "en": "Description",
-      "de": "Beschreibung",
-      "ru": "Description"
-    },
-    "Options" : {
-      "en": "Options",
-      "de": "Optionen",
-      "ru": "Options"
-    },
-    "Add device" : {
-      "en": "Add device",
-      "de": "Gerät hinzufügen",
-      "ru": "Add device"
-    },
-    "automatic detect device" : {
-      "en": "automatic detect device",
-      "de": "Automatische Geräteerkennung",
-      "ru": "automatic detect device"
-    },
-    "automatic remove device" : {
-      "en": "automatic remove device",
-      "de": "Automatische Geräteentfernung",
-      "ru": "automatic remove device"
-    },
-    "please wait..." : {
-      "en": "please wait...",
-      "de": "Bitte warten...",
-      "ru": "please wait..."
-    },
-    "edit" : {
-      "en": "edit",
-      "de": "Ändern",
-      "ru": "Edit"
-    },
-    "delete" : {
-      "en": "delete",
-      "de": "Löschen",
-      "ru": "delete"
-    },
-    "" : {
-      "en": "",
-      "de": "",
-      "ru": ""
-    },
-    "" : {
-      "en": "",
-      "de": "",
-      "ru": ""
-    },
-    "" : {
-      "en": "",
-      "de": "",
-      "ru": ""
-    }
+systemDictionary = {
+    "": {                                            },
+    "Add device": {                                  "en": "Add device",                                      "de": "Gerät hinzufügen",                                "ru": "Добавить устройство",                             "pt": "Adicionar dispositivo",                           "nl": "Voeg toestel toe",                                "fr": "Ajouter un appareil",                             "it": "Aggiungi dispositivo",                            "es": "Añadir dispositivo",                              "pl": "Dodaj urządzenie"},
+    "Description": {                                 "en": "Description",                                     "de": "Beschreibung",                                    "ru": "Описание",                                        "pt": "Descrição",                                       "nl": "Beschrijving",                                    "fr": "La description",                                  "it": "Descrizione",                                     "es": "Descripción",                                     "pl": "Opis"},
+    "Devices": {                                     "en": "Devices",                                         "de": "Geräte",                                          "ru": "приборы",                                         "pt": "Dispositivos",                                    "nl": "apparaten",                                       "fr": "Dispositifs",                                     "it": "dispositivi",                                     "es": "Dispositivos",                                    "pl": "Pomysłowość"},
+    "EEP": {                                         "en": "EEP",                                             "de": "EEP",                                             "ru": "EEP",                                             "pt": "EEP",                                             "nl": "EEP",                                             "fr": "EEP",                                             "it": "EEP",                                             "es": "EEP",                                             "pl": "EEP"},
+    "EnOcean adapter settings": {                    "en": "EnOcean adapter settings",                        "de": "EnOcean",                                         "ru": "Настройки адаптера EnOcean",                      "pt": "Configurações do adaptador EnOcean",              "nl": "EnOcean-adapterinstellingen",                     "fr": "Paramètres de l'adaptateur EnOcean",              "it": "Impostazioni dell'adattatore EnOcean",            "es": "Configuración del adaptador EnOcean",             "pl": "Ustawienia adaptera EnOcean"},
+    "ID": {                                          "en": "ID",                                              "de": "ID",                                              "ru": "Я БЫ",                                            "pt": "identidade",                                      "nl": "ID kaart",                                        "fr": "ID",                                              "it": "ID",                                              "es": "CARNÉ DE IDENTIDAD",                              "pl": "ID"},
+    "ID, EEP and description are mandatory.": {      "en": "ID, EEP and description are mandatory.",          "de": "ID, EEP und die Beschreibung sind Pflichtfelder.", "ru": "ID, EEP и описание являются обязательными.",      "pt": "ID, EEP e descrição são obrigatórios.",           "nl": "ID, EEP en beschrijving zijn verplicht.",         "fr": "L'identification, l'EEP et la description sont obligatoires.", "it": "ID, EEP e descrizione sono obbligatori.",         "es": "ID, EEP y descripción son obligatorios.",         "pl": "Identyfikator, EEP i opis są obowiązkowe."},
+    "Manufacturer": {                                "en": "Manufacturer",                                    "de": "Hersteller",                                      "ru": "производитель",                                   "pt": "Fabricante",                                      "nl": "Fabrikant",                                       "fr": "Fabricant",                                       "it": "fabbricante",                                     "es": "Fabricante",                                      "pl": "Producent"},
+    "Not available": {                               "en": "Not available",                                   "de": "Nicht verfügbar",                                 "ru": "Недоступен",                                      "pt": "Não disponível",                                  "nl": "Niet beschikbaar",                                "fr": "Indisponible",                                    "it": "Non disponibile",                                 "es": "No disponible",                                   "pl": "Niedostępne"},
+    "Options": {                                     "en": "Options",                                         "de": "Optionen",                                        "ru": "Опции",                                           "pt": "Opções",                                          "nl": "opties",                                          "fr": "Options",                                         "it": "Opzioni",                                         "es": "Opciones",                                        "pl": "Opcje"},
+    "Select port": {                                 "en": "Select port",                                     "de": "Port auswählen",                                  "ru": "Выбрать порт",                                    "pt": "Selecione a porta",                               "nl": "Selecteer poort",                                 "fr": "Sélectionnez un port",                            "it": "Seleziona porta",                                 "es": "Seleccionar puerto",                              "pl": "Wybierz port"},
+    "Serial port:": {                                "en": "Serial port:",                                    "de": "Schnittstelle:",                                  "ru": "Серийный порт:",                                  "pt": "Porta serial:",                                   "nl": "Seriële poort:",                                  "fr": "Port série:",                                     "it": "Porta seriale:",                                  "es": "Puerto serial:",                                  "pl": "Port szeregowy:"},
+    "Timeout": {                                     "en": "Timeout",                                         "de": "Timeout",                                         "ru": "Тайм-аут",                                        "pt": "Tempo esgotado",                                  "nl": "Time-out",                                        "fr": "Temps libre",                                     "it": "Tempo scaduto",                                   "es": "Se acabó el tiempo",                              "pl": "Koniec czasu"},
+    "add device": {                                  "en": "add device",                                      "de": "Gerät hinzufügen",                                "ru": "добавить устройство",                             "pt": "adicionar dispositivo",                           "nl": "Voeg toestel toe",                                "fr": "ajouter un appareil",                             "it": "Aggiungi dispositivo",                            "es": "añadir dispositivo",                              "pl": "Dodaj urządzenie"},
+    "automatic detect device": {                     "en": "automatic detect device",                         "de": "Automatische Geräteerkennung",                    "ru": "устройство автоматического обнаружения",          "pt": "dispositivo de detecção automática",              "nl": "automatisch detecteer apparaat",                  "fr": "dispositif de détection automatique",             "it": "dispositivo di rilevamento automatico",           "es": "dispositivo de detección automática",             "pl": "automatyczne wykrywanie urządzenia"},
+    "automatic remove device": {                     "en": "automatic remove device",                         "de": "Automatische Geräteentfernung",                   "ru": "автоматическое удаление устройства",              "pt": "dispositivo de remoção automática",               "nl": "automatisch apparaat verwijderen",                "fr": "dispositif de suppression automatique",           "it": "dispositivo di rimozione automatico",             "es": "dispositivo de eliminación automática",           "pl": "automatyczne usunięcie urządzenia"},
+    "delete": {                                      "en": "delete",                                          "de": "Löschen",                                         "ru": "Удалить",                                         "pt": "excluir",                                         "nl": "verwijderen",                                     "fr": "effacer",                                         "it": "Elimina",                                         "es": "borrar",                                          "pl": "kasować"},
+    "edit": {                                        "en": "edit",                                            "de": "Ändern",                                          "ru": "редактировать",                                   "pt": "editar",                                          "nl": "Bewerk",                                          "fr": "modifier",                                        "it": "modificare",                                      "es": "editar",                                          "pl": "edytować"},
+    "on save adapter restarts with new config immediately": {"en": "on save adapter restarts with new config immediately", "de": "Beim Speichern von Einstellungen der Adapter wird sofort neu gestartet.", "ru": "на перезаписываемом адаптере перезагружается с новой конфигурацией немедленно", "pt": "no adaptador de salvar reinicia com nova configuração imediatamente", "nl": "on save-adapter wordt onmiddellijk opnieuw opgestart met nieuwe config", "fr": "sur l'adaptateur de sauvegarde redémarre avec la nouvelle config immédiatement", "it": "su save adapter si riavvia immediatamente con la nuova configurazione", "es": "en el adaptador de guardar se reinicia con nueva configuración de inmediato", "pl": "na karcie save natychmiast uruchamia się z nową konfiguracją"},
+    "please wait...": {                              "en": "please wait...",                                  "de": "Bitte warten...",                                 "ru": "Пожалуйста, подождите...",                        "pt": "por favor, espere...",                            "nl": "even geduld aub...",                              "fr": "S'il vous plaît, attendez...",                    "it": "attendere prego...",                              "es": "por favor espera...",                             "pl": "proszę czekać..."},
+    "remove device": {                               "en": "remove device",                                   "de": "Gerät entfernen",                                 "ru": "удалить устройство",                              "pt": "remover dispositivo",                             "nl": "Verwijder apparaat",                              "fr": "enlevez l'appareil",                              "it": "rimuovere il dispositivo",                        "es": "retire el dispositivo",                           "pl": "odłącz urządzenie"},
 };
