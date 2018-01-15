@@ -206,9 +206,11 @@ adapter.on('message', async (obj) => {
                 for (var key in manufacturerList) {
                   if (manufacturerList.hasOwnProperty(key)) {
                     var manuDevice = manufacturerList[key];
+                    var localDeviceList = {};
                     for (var oneDevice in manuDevice) {
-                      retVal[key] = { [oneDevice] : { desc : manuDevice[oneDevice].desc}};
+                      localDeviceList[oneDevice] = { desc: manuDevice[oneDevice].desc};
                     }
+                    retVal[key] = localDeviceList;
                   }
                 }
                 respond({ error: null, result: retVal });
@@ -275,36 +277,32 @@ eo.on('learned', (data) => {
         // create the object provided by the translation matrix
         var descEntry = eepEntry.desc[data['desc'].toLowerCase()];
 
- //       if (descEntry != undefined) {
-            // a valid entry has been found
-            var eepType = eo.eepDesc[data['eep'].toLowerCase()];
+        adapter.setObjectNotExists(data['id'], {
+            type: 'device',
+            common: {
+                name: data['id']
+            },
+            native: {
+                id: data['id'],
+                eep: data['eep'].toLowerCase(),
+                manufacturer: data['manufacturer'],
+                device:  data['eepFunc'],
+                desc: data['desc']
+            }
+        });
 
-            adapter.setObjectNotExists(data['id'], {
-                type: 'device',
-                common: {
-                    name: data['id']
-                },
-                native: {
-                    id: data['id'],
-                    eep: data['eep'],
-                    manufacturer: data['manufacturer'],
-                    device:  data['eepFunc'],
-                    desc: data['desc']
-                }
-            });
-
-            // all devices have this entry, which is provided by the gateway
-            adapter.setObjectNotExists(data['id'] + '.rssi', {
-                type: 'state',
-                common: {
-                    name: 'Signal Strength',
-                    role: 'value.rssi',
-                    type: 'number',
-                    read: true,
-                    write: false
-                },
-                native: {}
-            });
+        // all devices have this entry, which is provided by the gateway
+        adapter.setObjectNotExists(data['id'] + '.rssi', {
+            type: 'state',
+            common: {
+                name: 'Signal Strength',
+                role: 'value.rssi',
+                type: 'number',
+                read: true,
+                write: false
+            },
+            native: {}
+        });
 
             var varObjects = descEntry.iobObjects;
             for (var variable in varObjects) {
@@ -334,6 +332,9 @@ eo.on('learned', (data) => {
         //}
     } else {
         // use the values provided by the enocean library.
+        // a valid entry has been found
+       var eepType = eo.eepDesc[data['eep'].toLowerCase()];
+
         adapter.setObjectNotExists(data['id'], {
             type: 'device',
             common: {

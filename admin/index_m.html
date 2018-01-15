@@ -128,7 +128,6 @@
 
         $(document).ready(function(){
                 $('.modal').modal();
-                $('select').material_select();
             });
 
         function getComPorts(settings) {
@@ -275,6 +274,7 @@
 
             $('#manufacturer').on('change',function() {
               var deviceList = manufacturerList[$(this).val()];
+              console.log("Devicelist = " + JSON.stringify(deviceList));
               $('#eep').val("");
               $('#desc').val("");
               var element = $('#device');
