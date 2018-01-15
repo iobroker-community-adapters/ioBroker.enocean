@@ -114,6 +114,7 @@
         var countdown = 0;
         var countTimer = null;
         var devices = {};
+        var manufacturerList = {};
         var addDeviceDialog;
 
         var deviceCommands = {
@@ -127,6 +128,7 @@
 
         $(document).ready(function(){
                 $('.modal').modal();
+                $('select').material_select();
             });
 
         function getComPorts(settings) {
@@ -185,6 +187,11 @@
             text += '<td style="text-align: center; white-space: nowrap;">' + obj.native.id + '</td>';
             text += '<td style="text-align: center; white-space: nowrap;">' + obj.native.eep + '</td>';
             text += '<td style="text-align: center; white-space: nowrap;">' + obj.native.manufacturer + '</td>';
+            if (obj.native.device) {
+              text += '<td style="text-align: center; white-space: nowrap;">' + obj.native.device + '</td>';
+            } else {
+              text += '<td style="text-align: center; white-space: nowrap;">' + '--' + '</td>';
+            }
             text += '<td style="text-align: center; white-space: nowrap;">' + obj.native.desc + '</td>';
 
             text += '<td style="text-align: center;">' + '' +
@@ -238,8 +245,7 @@
                 state && updateLearnMode(state.val);
             });
 
-            // populate the list of know devices
-            //var devices = eo.getSensors();
+            // populate the list of known devices
             socket.emit('getObjectView', 'system', 'device', { startkey: 'enocean.' + instance + '.', endkey: 'enocean.' + instance + '.\u9999', include_docs: true }, function (err, _devices) {
                 socket.emit('getStates', function (err, _values) {
                     var namespace = 'enocean.' + instance + '.';
@@ -254,25 +260,55 @@
                 });
             });
 
-
-
-            //         "Create a device": function () {
-            //             sendTo(null, "addDevice", data, function (result) {
-            //                 if (result && result.error) {
-            //                     showMessage(result.error, _('Error'), 'alert');
-            //                 }
-            //             });
-            $('#addDeviceSubmit').click(function() {
-              var desc = $("#desc").val();
-              if ("" == desc) {
-                  desc = 'native';
+            // populate the list of manufacturers eind their devices
+            sendTo(null, "getManufacturerList", null, function (result) {
+              var element = $('#manufacturer');
+              element.append('<option value="" disabled selected>unknown</option>');
+              manufacturerList = result.result;
+              for (var key in manufacturerList) {
+                if (manufacturerList.hasOwnProperty(key)) {
+                  element.append('<option value="' + key + '">' + key  + '</option>');
+                }
               }
-              var data = { deviceID: $("#id").val().toLowerCase(), eep: $("#eep").val().toLowerCase(), manufacturer : $("#manufacturer").val(), desc : desc};
+              $('#manufacturer').select();
+            });
+
+            $('#manufacturer').on('change',function() {
+              var deviceList = manufacturerList[$(this).val()];
+              $('#eep').val("");
+              $('#desc').val("");
+              var element = $('#device');
+              element.empty();
+              for (var key in deviceList) {
+                if (deviceList.hasOwnProperty(key)) {
+                  var text = translateWord("desc", systemLang, deviceList[key]);
+                  element.append('<option value="' + key + '">' + text  + '</option>');
+                }
+              }
+              $('#device').select();
+            });
+
+            $('#eep').on('change',function() {
+              $('#manufacturer').prop('selectedIndex', 0);
+              $('#manufacturer').select();
+              $('#device').empty();
+              $('#device').select();
+            });
+
+            $('#addDeviceSubmit').click(function() {
+              var id = $("#id").val().toLowerCase();
+              var data = { deviceID: id, eep: $("#eep").val().toLowerCase(), manufacturer : $("#manufacturer").val(), desc : $("#desc").val()};
+              data.device = $('#device').val();
+
+              if (id=="" || id.length !== 8) {
+                alert("ID has the wrong format (not empty, 8 char long).");
+              } else {
                 sendTo(null, "addDevice", data, function (result) {
                   if (result && result.error) {
                     showMessage(result.error, _('Error'), 'alert');
                   }
                 });
+              }
             });
 
             // react to object changes e.g. adding or deleting a device
@@ -400,19 +436,25 @@
       <div id="dialog-form" class="modal">
         <div class="modal-content">
           <h4 class="translate" style="width:100%;">Create new device</h4>
-          <p class="validateTips translate">ID and EEP are mandatory.</p>
+          <p class="validateTips translate">Add ID and either manufacturer/device or EEP/description.</p>
           <div class="row">
-             <div class="input-field col s6">
-               <input placeholder="xxxxxxxx" type="text" name="id" id="id" value="" class="validate">
-               <label for="id" class="translate">ID</label>
-             </div>
+            <div class="input-field col s12">
+              <input placeholder="12345678" type="text" name="id" id="id" value="" class="validate">
+              <label for="id" class="translate">ID</label>
+            </div>
+            <div class="input-field col s6">
+              <select placeholder="unknown" class="value" name= "manufacturer" id="manufacturer" type="text" ></select>
+              <label for="manufacturer" class="translate">Manufacturer</label>
+            </div>
+            <div class="input-field col s6">
+              <select placeholder="unknown" class="value" name= "device" id="device" type="text" ></select>
+              <label for="device" class="translate">Devices</label>
+            </div>
+            <div class="input-field col s12" style="height:1em;">
+            </div>
              <div class="input-field col s6">
                <input placeholder="xx-xx-xx" type="text" name="eep" id="eep" value="" class="validate">
                <label for="eep" class="translate">EEP</label>
-             </div>
-             <div class="input-field col s6">
-               <input placeholder="unknown" type="text" name="manufacturer" id="manufacturer" value="" class="validate">
-               <label for="manufacturer" class="translate">Manufacturer</label>
              </div>
              <div class="input-field col s6">
                <input placeholder="native" type="text" name="desc" id="desc" value="" class="validate">
@@ -421,7 +463,7 @@
            </div>
         </div>
         <div class="modal-footer">
-          <button class="btn waves-effect waves-light modal-close translate" type="submit" name="action" id="addDeviceSubmit">add device
+          <button class="btn waves-effect waves-light modal-close modal-action translate" type="submit" name="action" id="addDeviceSubmit">add device
             <i class="material-icons right">send</i>
           </button>
           <button class="btn waves-effect waves-light modal-close modal-action translate" href="#!">close</button>
@@ -471,6 +513,7 @@
                       <th style="width: 30px;  text-align: center; white-space: nowrap" class="translate">ID</th>
                       <th style="width: 100px; text-align: center; white-space: nowrap" class="translate">EEP</th>
                       <th style="width: 70px;  text-align: center; white-space: nowrap" class="translate">Manufacturer</th>
+                      <th style="width: 70px;  text-align: center; white-space: nowrap" class="translate">Device</th>
                       <th style="width: 150px; text-align: center; white-space: nowrap" class="translate">Description</th>
                       <th style="width: 20px;  text-align: center; white-space: nowrap" class="translate">Function</th>
                   </tr>

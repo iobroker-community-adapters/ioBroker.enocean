@@ -1,0 +1,112 @@
+{
+  "Ad Hoc Electronics": {},
+  "Afriso": {},
+  "Distech Controls": {},
+  "Easysens": {},
+  "Echoflex Solutions": {},
+  "Eltako": {
+    "FRW": {
+      "desc": {
+        "en": "FRW ( Dectomat HDv3000OS)",
+        "de": "FRW ( Dectomat HDv3000OS)",
+        "ru": "FRW ( Dectomat HDv3000OS)",
+        "pt": "FRW ( Dectomat HDv3000OS)",
+        "nl": "FRW ( Dectomat HDv3000OS)",
+        "fr": "FRW ( Dectomat HDv3000OS)",
+        "it": "FRW ( Dectomat HDv3000OS)",
+        "es": "FRW ( Dectomat HDv3000OS)",
+        "pl": "FRW ( Dectomat HDv3000OS)"
+      },
+      "eep": [
+        {
+          "val": "F6-02-01",
+          "type": "smokedetector_1"
+        }
+      ]
+    }
+  },
+  "Enocean": {},
+  "Honeywell PEHA": {
+    "windowcontact": {
+      "desc": {
+        "en": "Easyckick Window Contact",
+        "de": "Easyclick Fensterkontakt",
+        "ru": "Easyckick Window Contact",
+        "pt": "Easyckick Window Contact",
+        "nl": "Easyckick Window Contact",
+        "fr": "Easyckick Window Contact",
+        "it": "Easyckick Window Contact",
+        "es": "Easyckick Window Contact",
+        "pl": "Easyckick Window Contact"
+      },
+      "eep": [
+        {
+          "val": "D5-00-01",
+          "type": "native"
+        }
+      ]
+    }
+  },
+  "Hoppe": {
+    "secusignal_windowhandle": {
+      "desc": {
+        "en": "SecuSignal Window Handle",
+        "de": "SecuSignal Funk-Fenstergriff",
+        "ru": "SecuSignal Window Handle",
+        "pt": "SecuSignal Window Handle",
+        "nl": "SecuSignal Window Handle",
+        "fr": "SecuSignal Window Handle",
+        "it": "SecuSignal Window Handle",
+        "es": "SecuSignal Window Handle",
+        "pl": "SecuSignal Window Handle"
+      },
+      "eep": [
+        {
+          "val": "F6-10-00",
+          "type": "native"
+        }
+      ]
+    }
+  },
+  "Omnio": {},
+  "Thermokon": {
+    "SR4_7": {
+      "desc": {
+        "en": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
+        "de": "SR04, SR07, LC-SR04 Funk-Raumtemperaturfühler",
+        "ru": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
+        "pt": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
+        "nl": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
+        "fr": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
+        "it": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
+        "es": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
+        "pl": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor"
+      },
+      "eep": [
+        {
+          "val": "A5-02-05",
+          "type": "native"
+        }
+      ]
+    },
+    "SAB05": {
+      "desc": {
+        "en": "???",
+        "de": "SAB05 EasySens Funk-Kleinstellantrieb für Raumtemperaturregelung",
+        "ru": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
+        "pt": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
+        "nl": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
+        "fr": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
+        "it": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
+        "es": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
+        "pl": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor"
+      },
+      "eep": [
+        {
+          "val": "A5-20-01",
+          "type": "native"
+        }
+      ]
+    }
+  }
+}

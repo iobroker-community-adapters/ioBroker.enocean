@@ -22,6 +22,9 @@ const translationMatrix = require('./eep/EEP2IOB.json');
 // translation functions
 var eepTranslation = require('./eep/eepInclude.js');
 
+// list of manufacturers, devicees and their configuration
+const manufacturerList = require("./eep/devices.json");
+
 // you have to call the adapter function and pass a options object
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
 // adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
@@ -174,13 +177,41 @@ adapter.on('message', async (obj) => {
                 eo.forget(obj.message.deviceID);
                 break;
             case 'addDevice':
-                adapter.log.debug("Received add message: " + JSON.stringify(obj));
+              adapter.log.debug("Try to add " + JSON.stringify(obj.message.deviceID));
+                var eep = obj.message.eep ;
+                var desc = obj.message.desc;
+                var manu = obj.message.manufacturer;
+                var device = obj.message.device;
+
+                // EEP/desc or manu/device
+                if ( ((eep === "") || (desc === "")) && (manu !== "" && device !== "")) {
+                  adapter.log.debug("Selection by manufacturer and device : " + manu + " : " + device);
+                  eep = manufacturerList[manu][device].eep[0].val;
+                  desc = manufacturerList[manu][device].eep[0].type;
+                }
+
+                adapter.log.debug("EEP : " + eep + " and desc : " + desc);
+
                 eo.learn({
                     id: obj.message.deviceID,
-                    eep: obj.message.eep,
-                    desc: obj.message.desc,
-                    manufacturer: obj.message.manufacturer
+                    eep: eep,
+                    desc: desc,
+                    manufacturer: manu,
+                    eepFunc: device
                 });
+                break;
+              case 'getManufacturerList' :
+                adapter.log.debug("Received getManufacturerList");
+                var retVal = {};
+                for (var key in manufacturerList) {
+                  if (manufacturerList.hasOwnProperty(key)) {
+                    var manuDevice = manufacturerList[key];
+                    for (var oneDevice in manuDevice) {
+                      retVal[key] = { [oneDevice] : { desc : manuDevice[oneDevice].desc}};
+                    }
+                  }
+                }
+                respond({ error: null, result: retVal });
                 break;
             default:
                 adapter.log.info("Received unhandled message: " + obj.command);
@@ -257,8 +288,8 @@ eo.on('learned', (data) => {
                     id: data['id'],
                     eep: data['eep'],
                     manufacturer: data['manufacturer'],
-                    desc: data['desc'],
-                    eepType: eepType
+                    device:  data['eepFunc'],
+                    desc: data['desc']
                 }
             });
 
@@ -339,7 +370,6 @@ eo.on('learned', (data) => {
 eo.on('forgotten', (data) => {
     // delete the device in ioBroker
     const deviceId = data.id;
-    adapter.log.debug("Devices = " + JSON.stringify(devices));
     if (deviceId in devices) {
         adapter.log.debug(`deleting device and state ${deviceId}`);
         // delete all states
@@ -490,7 +520,7 @@ async function listSerial() {
                 if (platform === 'linux') {
                     // device can be a USB stick (ttyUSBx) or EnoceanPi gpio header (ttyAMAx)
                     //result = result.filter(p => p.match(/tty(USB|AMA)/g));
-                    result = result.filter(p => p.match(/tty/g));  // new style: symlinks should be selectable.
+                    result = result.filter(p => p.match(/ttyUSB/g));  // new style: symlinks should be selectable.
                 }
 
                 resolve(result);
