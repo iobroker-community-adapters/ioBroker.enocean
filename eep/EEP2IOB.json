@@ -1,4 +1,28 @@
 {
+  "a5-02-05" : {
+    "desc": {
+      "native": {
+        "iobObjects": [
+          {"id": "temperature","common.name": "Temperature","common.type": "number","common.min": "0","common.max": "40","common.def": "0",
+            "common.role": "value.temperature", "common.states" : "", "common.read": "true", "common.write": "false", "common.unit": "°C"},
+          {"id": "learn_button","common.name": "Learn Button","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "state", "common.states" : "false:teach-in telegram;true:data telegram", "common.read": "true", "common.write": "false"}
+        ]
+      }
+    }
+  },
+  "d5-00-01" : {
+    "desc": {
+      "native": {
+        "iobObjects": [
+          {"id": "contact_status","common.name": "Contact Status","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "state", "common.states" : "false:closed;true:open", "common.read": "true", "common.write": "false"},
+          {"id": "learn_button","common.name": "Learn Button","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "state", "common.states" : "false:not pressed;true:pressed", "common.read": "true", "common.write": "false"}
+        ]
+      }
+    }
+  },
   "f6-02-01": {
     "desc": {
       "native": {
@@ -31,18 +55,6 @@
         "iobObjects": [
           {"id": "window_handle","common.name": "Window Handle Status","common.type": "number","common.min": "0","common.max": "2","common.def": "0",
             "common.role": "state", "common.states" : "0:closed;1:open;2:tilt", "common.read": "true", "common.write": "false"}
-        ]
-      }
-    }
-  },
-  "d5-00-01" : {
-    "desc": {
-      "native": {
-        "iobObjects": [
-          {"id": "contact_status","common.name": "Contact Status","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
-            "common.role": "state", "common.states" : "false:closed;true:open", "common.read": "true", "common.write": "false"},
-          {"id": "learn_button","common.name": "Learn Button","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
-            "common.role": "state", "common.states" : "false:not pressed;true:pressed", "common.read": "true", "common.write": "false"}
         ]
       }
     }

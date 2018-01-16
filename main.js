@@ -17,13 +17,13 @@ const platform = os.platform();
 const devices = {};
 
 // translation matrix
-const translationMatrix = require('./eep/EEP2IOB.json');
+const TRANSLATION_MATRIX = require('./eep/EEP2IOB.json');
 
 // translation functions
-var eepTranslation = require('./eep/eepInclude.js');
+var EEP_TRANSLATION = require('./eep/eepInclude.js');
 
 // list of manufacturers, devicees and their configuration
-const manufacturerList = require("./eep/devices.json");
+const MANUFACTURER_LIST = require("./eep/devices.json");
 
 // you have to call the adapter function and pass a options object
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
@@ -178,34 +178,39 @@ adapter.on('message', async (obj) => {
                 break;
             case 'addDevice':
               adapter.log.debug("Try to add " + JSON.stringify(obj.message.deviceID));
-                var eep = obj.message.eep ;
-                var desc = obj.message.desc;
-                var manu = obj.message.manufacturer;
-                var device = obj.message.device;
+              // Add checks here
+                if (false) {
 
-                // EEP/desc or manu/device
-                if ( ((eep === "") || (desc === "")) && (manu !== "" && device !== "")) {
-                  adapter.log.debug("Selection by manufacturer and device : " + manu + " : " + device);
-                  eep = manufacturerList[manu][device].eep[0].val;
-                  desc = manufacturerList[manu][device].eep[0].type;
+                } else {
+                  var eep = obj.message.eep ;
+                  var desc = obj.message.desc;
+                  var manu = obj.message.manufacturer;
+                  var device = obj.message.device;
+
+                  // EEP/desc or manu/device
+                  if ( ((eep === "") || (desc === "")) && (manu !== "" && device !== "")) {
+                    adapter.log.debug("Selection by manufacturer and device : " + manu + " : " + device);
+                    eep = MANUFACTURER_LIST[manu][device].eep[0].val;
+                    desc = MANUFACTURER_LIST[manu][device].eep[0].type;
+                  }
+
+                  adapter.log.debug("EEP : " + eep + " and desc : " + desc);
+
+                  eo.learn({
+                      id: obj.message.deviceID,
+                      eep: eep,
+                      desc: desc,
+                      manufacturer: manu,
+                      eepFunc: device
+                  });
                 }
-
-                adapter.log.debug("EEP : " + eep + " and desc : " + desc);
-
-                eo.learn({
-                    id: obj.message.deviceID,
-                    eep: eep,
-                    desc: desc,
-                    manufacturer: manu,
-                    eepFunc: device
-                });
                 break;
               case 'getManufacturerList' :
                 adapter.log.debug("Received getManufacturerList");
                 var retVal = {};
-                for (var key in manufacturerList) {
-                  if (manufacturerList.hasOwnProperty(key)) {
-                    var manuDevice = manufacturerList[key];
+                for (var key in MANUFACTURER_LIST) {
+                  if (MANUFACTURER_LIST.hasOwnProperty(key)) {
+                    var manuDevice = MANUFACTURER_LIST[key];
                     var localDeviceList = {};
                     for (var oneDevice in manuDevice) {
                       localDeviceList[oneDevice] = { desc: manuDevice[oneDevice].desc};
@@ -271,7 +276,7 @@ eo.on('learned', (data) => {
     adapter.log.info('New device registered: ' + JSON.stringify(data));
 
     // check, if a EEP translation matrix is available
-    var eepEntry = translationMatrix[data['eep'].toLowerCase()];
+    var eepEntry = TRANSLATION_MATRIX[data['eep'].toLowerCase()];
 
     if ((eepEntry != undefined) && (eepEntry.desc[data['desc'].toLowerCase()] != undefined)){
         // create the object provided by the translation matrix
@@ -318,7 +323,8 @@ eo.on('learned', (data) => {
                         role: entriesToCreate['common.role'],
                         states: entriesToCreate['common.states'],
                         read: entriesToCreate['common.read'],
-                        write: entriesToCreate['common.write']
+                        write: entriesToCreate['common.write'],
+                        unit: entriesToCreate['common.unit']
                     }, native: {}
                 });
 
@@ -406,7 +412,7 @@ eo.on('known-data', (data) => {
         adapter.setState(senderID + '.rssi', { val: rssi, ack: true });
 
         var eepEntry = sensor['eep'].toLowerCase().replace(/-/g,"_") + '_' + sensor['desc'].toLowerCase();
-        var callFunction = eepTranslation[eepEntry];
+        var callFunction = EEP_TRANSLATION[eepEntry];
 
         if (callFunction != undefined) {
             // The return value is a map consisting of variable and value
@@ -549,4 +555,9 @@ function ensureInstanceObjects() {
             }
         });
     }
+}
+
+// add a device
+function addDevice(id, manufacturer, device, eep, description) {
+
 }

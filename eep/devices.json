@@ -91,15 +91,15 @@
     },
     "SAB05": {
       "desc": {
-        "en": "???",
+        "en": "SAB05 Wireless valve actuator",
         "de": "SAB05 EasySens Funk-Kleinstellantrieb für Raumtemperaturregelung",
-        "ru": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
-        "pt": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
-        "nl": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
-        "fr": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
-        "it": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
-        "es": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",
-        "pl": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor"
+        "ru": "SAB05 Wireless valve actuator",
+        "pt": "SAB05 Wireless valve actuator",
+        "nl": "SAB05 Wireless valve actuator",
+        "fr": "SAB05 Wireless valve actuator",
+        "it": "SAB05 Wireless valve actuator",
+        "es": "SAB05 Wireless valve actuator",
+        "pl": "SAB05 Wireless valve actuator"
       },
       "eep": [
         {
