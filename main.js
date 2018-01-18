@@ -232,22 +232,28 @@ function main() {
       AVAILABLE_PORTS = ports.map(p => p.comName);
     });
 
-    SERIAL_PORT = new sP(adapter.config.serialport, { baudrate: 57600, autoOpen: false, parser: ENOCEAN_PARSER });
-    SERIAL_PORT.open(function (err) {
-      if (err) {
-        throw new Error('Configured serial port is not available. Please check your Serialport setting and your USB Gateway.');
-      }
-    });
+    try {
+      SERIAL_PORT = new sP(adapter.config.serialport, { baudrate: 57600, autoOpen: false, parser: ENOCEAN_PARSER });
+      SERIAL_PORT.open(function (err) {
+        if (err) {
+          throw new Error('Configured serial port is not available. Please check your Serialport setting and your USB Gateway.');
+        }
+      });
 
-    // the open event will always be emitted
-    SERIAL_PORT.on('open', function() {
-      adapter.log.debug("Port has been opened.");
-      adapter.setState('info.connection', true, true);
-    });
+      // the open event will always be emitted
+      SERIAL_PORT.on('open', function() {
+        adapter.log.debug("Port has been opened.");
+        adapter.setState('info.connection', true, true);
+      });
 
-    SERIAL_PORT.on('data', function (data) {
-      parseMessage(data);
-    });
+      SERIAL_PORT.on('data', function (data) {
+        parseMessage(data);
+      });
+
+    } catch (e) {
+      adapter.log.warn('Unable to connect to serial port. + ' + JSON.stringify(e));
+    }
+
 }
 
 // is called when adapter shuts down - callback has to be called under any circumstances!
