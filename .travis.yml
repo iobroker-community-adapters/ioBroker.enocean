@@ -3,6 +3,8 @@ os:
   - osx
 language: node_js
 node_js:
+  - '4'
+  - '6'
   - '8'
 before_install:
   - 'if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export CC=clang++; export CXX=clang++; export CXXFLAGS=-std=c++11; fi'
