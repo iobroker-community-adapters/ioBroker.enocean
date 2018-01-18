@@ -297,7 +297,7 @@ adapter.on('stateChange', (id, state) => {
 });
 
 // Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
-adapter.on('message', async (obj) => {
+adapter.on('message', (obj) => {
 
     // responds to the adapter that sent the original message
     function respond(response) {
