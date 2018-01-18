@@ -28,7 +28,7 @@
     "url": "https://github.com/jey-cee/ioBroker.enocean"
   },
   "dependencies": {
-    "node-serialport-enocean-parser": "^0.1.0"
+    "serialport-enocean-parser": "^0.1.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
