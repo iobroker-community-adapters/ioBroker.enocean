@@ -381,6 +381,22 @@ adapter.on('message', (obj) => {
                 }
                 respond({ error: null, result: retVal });
                 break;
+                case 'getEEPList' :
+                  adapter.log.debug("Received getEEPList");
+                  var retVal = {};
+                  for (var key in TRANSLATION_MATRIX) {
+                    if (TRANSLATION_MATRIX.hasOwnProperty(key)) {
+                      var eepType = TRANSLATION_MATRIX[key];
+                      var eepTypeEntries = {};
+                      for (var oneEEPType in eepType.desc) {
+                        eepTypeEntries[oneEEPType.toUpperCase()] = { desc: oneEEPType.toUpperCase()};
+                      }
+                      retVal[key] = eepTypeEntries;
+                    }
+                  }
+//                  adapter.log.debug("EEP List : " + JSON.stringify(retVal));
+                  respond({ error: null, result: retVal });
+                  break;
             default:
                 adapter.log.info("Received unhandled message: " + obj.command);
                 break;

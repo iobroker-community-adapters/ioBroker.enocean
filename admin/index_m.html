@@ -115,6 +115,7 @@
         var countTimer = null;
         var devices = {};
         var manufacturerList = {};
+        var eepTypeList = {};
         var addDeviceDialog;
 
         var deviceCommands = {
@@ -272,11 +273,28 @@
               $('#manufacturer').select();
             });
 
+            // get the list of supported EEPs and functions.
+            sendTo(null, "getEEPList", null, function (result) {
+              var element = $('#eep');
+              element.append('<option value="" disabled selected>xx-xx-xx</option>');
+              eepTypeList = result.result;
+              for (var key in eepTypeList) {
+                 if (eepTypeList.hasOwnProperty(key)) {
+                   element.append('<option value="' + key + '">' + key  + '</option>');
+                 }
+               }
+              $('#eep').select();
+            });
+
+
+
+
             $('#manufacturer').on('change',function() {
               var deviceList = manufacturerList[$(this).val()];
-              console.log("Devicelist = " + JSON.stringify(deviceList));
-              $('#eep').val("");
-              $('#desc').val("");
+              $('#eep').prop('selectedIndex', 0);
+              $('#eep').select();
+              $('#desc').empty();
+              $('#desc').select();
               var element = $('#device');
               element.empty();
               for (var key in deviceList) {
@@ -289,16 +307,33 @@
             });
 
             $('#eep').on('change',function() {
+              var deviceList = eepTypeList[$(this).val()];
               $('#manufacturer').prop('selectedIndex', 0);
               $('#manufacturer').select();
               $('#device').empty();
               $('#device').select();
+              var element = $('#desc');
+              element.empty();
+              for (var key in deviceList) {
+                if (deviceList.hasOwnProperty(key)) {
+                  element.append('<option value="' + key + '">' + key  + '</option>');
+                }
+              }
+              $('#desc').select();
             });
 
             $('#addDeviceSubmit').click(function() {
               var id = $("#id").val().toLowerCase();
-              var data = { deviceID: id, eep: $("#eep").val().toLowerCase(), manufacturer : $("#manufacturer").val(), desc : $("#desc").val()};
-              data.device = $('#device').val();
+              var eep = $("#eep").val().toLowerCase();
+              var manufacturer = $("#manufacturer").val();
+              var description = $("#desc").val().toLowerCase();
+              var device = $('#device').val();
+              if (null === manufacturer || undefined === manufacturer) {manufacturer = "";}
+              if (null === description || undefined === description) {description = "";}
+              if (null === device || undefined === device) {device = "";}
+              if (null === eep || undefined === eep) {eep = "";}
+              var data = { deviceID: id, eep: eep, manufacturer : manufacturer, desc : description};
+              data.device = device;
 
               if (id=="" || id.length !== 8) {
                 alert("ID has the wrong format (not empty, 8 char long).");
@@ -453,11 +488,11 @@
             <div class="input-field col s12" style="height:1em;">
             </div>
              <div class="input-field col s6">
-               <input placeholder="xx-xx-xx" type="text" name="eep" id="eep" value="" class="validate">
+               <select placeholder="xx-xx-xx" class="value" name= "eep" id="eep" type="text" ></select>
                <label for="eep" class="translate">EEP</label>
              </div>
              <div class="input-field col s6">
-               <input placeholder="native" type="text" name="desc" id="desc" value="" class="validate">
+               <select placeholder="native" class="value" name= "desc" id="desc" type="text" ></select>
                <label for="desc" class="translate">Description</label>
              </div>
            </div>
