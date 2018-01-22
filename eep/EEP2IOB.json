@@ -49,6 +49,38 @@
       }
     }
   },
+  "f6-02-02": {
+    "desc": {
+      "native": {
+        "iobObjects": [
+          {"id": "R1_AI","common.name": "R1.AI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "R1_AO","common.name": "R1.AO","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "R1_BI","common.name": "R1.BI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "R1_BO","common.name": "R1.BO","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"}
+        ]
+      }
+    }
+  },
+  "f6-02-03": {
+    "desc": {
+      "native": {
+        "iobObjects": [
+          {"id": "A0","common.name": "Automatic Mode","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "A1","common.name": "Light On/Off","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "B0","common.name": "Dim light up","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "B1","common.name": "Dim light down","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"}
+        ]
+      }
+    }
+  },
   "f6-10-00" : {
     "desc": {
       "native": {

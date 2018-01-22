@@ -75,7 +75,15 @@ function handleType1Message(data, rawMessage) {
       // The return value is a map consisting of variable and value
       var varToSet = callFunction(rawMessage.slice(10,100));
       for (var key in varToSet) {
-        adapter.setState(senderID + '.' + key, { val: varToSet[key], ack: true });
+        let valToSet = varToSet[key];
+        if ('toggle' === valToSet) {
+          // get the state and invert it (only boolean type)
+          adapter.getState(senderID + '.' + key, function (err, state) {
+            adapter.setState(senderID + '.' + key, { val: !state, ack: true });
+            });
+        } else {
+          adapter.setState(senderID + '.' + key, { val: valToSet, ack: true });
+        }
       }
     }
   }
