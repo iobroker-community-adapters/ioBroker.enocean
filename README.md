@@ -2,7 +2,7 @@
 # ioBroker.enocean
 =================
 
-####IMPORTANT: Node 8.x+ needed!
+####IMPORTANT: Node 4.x+ needed!
 
 Tested with USB 300 Gateway https://www.enocean.com/de/enocean_module/usb-300-oem/
 
