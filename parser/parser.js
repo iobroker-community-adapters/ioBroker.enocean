@@ -4,7 +4,6 @@
 
 // Copyright 2015 Rafael Kähm <rafael@kaehms.de>
 
-const Buffer = require('safe-buffer').Buffer;
 const Transform = require('stream').Transform;
 const BUFFER_LENGTH = 6 + 65536;
 
