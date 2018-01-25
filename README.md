@@ -2,13 +2,21 @@
 # ioBroker.enocean
 =================
 
-####IMPORTANT: Node 8.x+ needed!
+####IMPORTANT: Node 4.x+ needed!
 
 Tested with USB 300 Gateway https://www.enocean.com/de/enocean_module/usb-300-oem/
 
 At this time the Adapter can only recive states.
 
 ## Changelog
+
+### 0.1.3
+* (Schluesselmeister) Added support for Admin v3
+* (Schluesselmeister) Added additional Languages
+* (Schluesselmeister) Add basic manufacturer/device list to automatically select EEP/desc.
+* (Schluesselmeister) Added tests for nodejs version 4 and 6 again
+* (Schluesselmeister) Changed EEP/desc field to drop down lists.
+* (Schluesselmeister) Added F6-02-02, F6-02-03, A5-02-05 without testing. 
 
 #### 0.1.2
 * (Schluesselmeister) Added device managment to adapter config
