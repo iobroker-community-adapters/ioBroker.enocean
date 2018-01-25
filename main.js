@@ -2,6 +2,7 @@
 // jshint strict:false
 /*jslint node: true */
 /*jslint es6 */
+/*jslint esversion: 6 */
 'use strict';
 
 // you have to require the utils module and call adapter function
@@ -11,7 +12,8 @@ const sP = require('serialport');
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
-const ENOCEAN_PARSER = require("serialport-enocean-parser");
+//const ENOCEAN_PARSER = require("serialport-enocean-parser");
+const SERIALPORT_PARSER_CLASS = require('./parser/parser.js');
 
 const PLATFORM = os.platform();
 
@@ -32,6 +34,9 @@ var AVAILABLE_PORTS = {};
 
 // The serial port
 var SERIAL_PORT = null;
+
+// The ESP3 parsers
+var SERIALPORT_ESP3_PARSER = null;
 
 // you have to call the adapter function and pass a options object
 // name has to be set and has to be equal to adapters folder name and main file name excluding extension
@@ -56,13 +61,18 @@ function toHexString(byteArray) {
 }
 
 // handle packet type 1 messages
-function handleType1Message(data, rawMessage) {
-  var senderID = rawMessage.slice(10 + ((data.header.dataLength - 5) * 2), 10 + ((data.header.dataLength - 1) * 2));
+function handleType1Message(rawMessage) {
+  let dataLength = parseInt(rawMessage.slice(2,6), 16);
+  let optionalLength = parseInt(rawMessage.slice(6,8), 16);
+
+  let senderID = rawMessage.slice(12 + ((dataLength - 5) * 2), 12 + ((dataLength - 1) * 2));
     // ID is 4 bytes long and at the end of the data plus on status byte.
   adapter.log.debug("Message for ID " + senderID + " has been received.");
   if (senderID in devices) {  // device is known
-    if (data.header.optionalLength > 0) { // optional data including rssi are present
-      adapter.setState(senderID + '.rssi', { val: data.optionalData[5], ack: true });
+    if (optionalLength > 0) { // optional data including rssi are present
+      let place = 12 + 2*dataLength + 10 ;
+      let signalStrength = parseInt(rawMessage.slice(place,place+2), 16);
+      adapter.setState(senderID + '.rssi', { val: signalStrength, ack: true });
     }
 
     let eep = devices[senderID].native.eep;
@@ -73,7 +83,8 @@ function handleType1Message(data, rawMessage) {
 
     if (callFunction != undefined) {
       // The return value is a map consisting of variable and value
-      var varToSet = callFunction(rawMessage.slice(10,100));
+      var varToSet = callFunction(rawMessage.slice(12,100).toString());
+      adapter.log.debug('variables to set : ' + JSON.stringify(varToSet));
       for (var key in varToSet) {
         let valToSet = varToSet[key];
         if ('toggle' === valToSet) {
@@ -91,28 +102,18 @@ function handleType1Message(data, rawMessage) {
 
 // parse the datapackage and construct a raw message
 function parseMessage(data) {
-
-  // convert the databuffer to hex for easy parsing and debugging
-  var rawMessage = toHex(data.syncByte) + toHex(data.header.dataLength) + toHex(data.header.optionalLength) + toHex(data.header.packetType);
-  rawMessage += toHex(data.crc8Header);
-
-  if (data.header.dataLength > 0) {
-      rawMessage += toHexString(data.data);
-  }
-  if (data.header.optionalLength > 0) {
-      rawMessage += toHexString(data.optionalData);
-  }
-
-  adapter.log.debug("Received raw message: " + rawMessage);
+  adapter.log.debug("Received raw message: " + data);
 
   // packet type 1
-  switch (data.header.packetType) {
+  var packetType =  parseInt(data.slice(8,10), 16);
+  switch (packetType) {
     case 1 : // normal user data
-      handleType1Message(data, rawMessage);
+      handleType1Message(data);
       break;
 
     default:
       adapter.log.debug("Packet type " + toHex(data.header.packetType) + " has been received, but is not handled.");
+      break;
   }
 }
 
@@ -241,7 +242,8 @@ function main() {
     });
 
     try {
-      SERIAL_PORT = new sP(adapter.config.serialport, { baudrate: 57600, autoOpen: false, parser: ENOCEAN_PARSER });
+      SERIAL_PORT = new sP(adapter.config.serialport, { baudRate: 57600, autoOpen: false});
+      SERIALPORT_ESP3_PARSER = SERIAL_PORT.pipe(new SERIALPORT_PARSER_CLASS());
       SERIAL_PORT.open(function (err) {
         if (err) {
           throw new Error('Configured serial port is not available. Please check your Serialport setting and your USB Gateway.');
@@ -254,9 +256,14 @@ function main() {
         adapter.setState('info.connection', true, true);
       });
 
-      SERIAL_PORT.on('data', function (data) {
+//      SERIAL_PORT.on('data', function (data) {
+//        parseMessage(data);
+//      });
+
+      SERIALPORT_ESP3_PARSER.on('data', function (data) {
         parseMessage(data);
       });
+
 
     } catch (e) {
       adapter.log.warn('Unable to connect to serial port. + ' + JSON.stringify(e));
@@ -270,7 +277,7 @@ adapter.on('unload', (callback) => {
         adapter.log.debug("Shutting down.");
         adapter.setState('info.connection', false, true);
 
-        if (SERIAL_PORT != null) {
+        if (SERIAL_PORT !== null) {
             SERIAL_PORT.close();
         }
     } catch (e) {
