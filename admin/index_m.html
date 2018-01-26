@@ -240,11 +240,6 @@
             socket.emit('subscribeStates', namespace + '.info.*');
             socket.emit('subscribeObjects', namespace + '.*'); // seems, this doesn't work.
 
-            // check for current state of the learn mode
-            socket.emit('getState', namespace + '.info.learnMode', function (err, state) {
-                state && updateLearnMode(state.val);
-            });
-
             // populate the list of known devices
             socket.emit('getObjectView', 'system', 'device', { startkey: 'enocean.' + instance + '.', endkey: 'enocean.' + instance + '.\u9999', include_docs: true }, function (err, _devices) {
                 socket.emit('getStates', function (err, _values) {
@@ -375,16 +370,6 @@
                 // only watch our own states
                 if (id.substring(0, namespaceLen) !== namespace) return;
                 console.log("State change announced: " + id + " and obj = " + JSON.stringify(state));
-
-                if (state) {
-                    if (id.match(/\.info\.learnMode$/)) {
-                        updateLearnMode(state.val);
-                    } else if (id.match(/\.info\.lastLearned/)) {
-                        $('#lastInfo').html(state.val);
-                    } else if (id.match(/\.info\.lastForgotten/)) {
-                        $('#lastInfo').html(state.val);
-                    }
-                }
             });
 
             // Signal to admin, that no changes yet
@@ -406,60 +391,6 @@
             });
             callback(obj);
         }
-
-
-        function updateLearnMode(value) {
-            // learn mode was updated
-            var container = $('#manageDevices');
-            var learnButton = $('#addDevice');
-            var forgetButton = $('#removeDevice');
-            switch (value) {
-                case 0: // idle
-                    if (countTimer) {
-                        clearInterval(countTimer);
-                        $('#countdown').html('');
-                        countTimer = null;
-                    }
-                    // enable the buttons and hide the message
-                    container.toggleClass('active', false);
-                    learnButton.prop('disabled', false);
-                    forgetButton.prop('disabled', false);
-                    break;
-                case 1: // learning
-                    // disable the button and show the message
-                    container.toggleClass('active', true);
-                    learnButton.prop('disabled', true);
-                    forgetButton.prop('disabled', true);
-                    countdown = 60;
-                    countTimer = setInterval(function () {
-                        countTimer = null;
-                        countdown--;
-                        $('#countdown').html(_('Learn device in the next %s seconds', countdown));
-                        if (countdown <= 0) {
-                            clearInterval(countTimer);
-                            countTimer = null;
-                        }
-                    }, 1000);
-                    break;
-                case 2: // forgetting
-                    // disable the button and show the message
-                    container.toggleClass('active', true);
-                    learnButton.prop('disabled', true);
-                    forgetButton.prop('disabled', true);
-                    countdown = 60;
-                    countTimer = setInterval(function () {
-                        countTimer = null;
-                        countdown--;
-                        $('#countdown').html(_('Unlearn device in the next %s seconds', countdown));
-                        if (countdown <= 0) {
-                            clearInterval(countTimer);
-                            countTimer = null;
-                        }
-                    }, 1000);
-                    break;
-            }
-        }
-
     </script>
 </head>
 <body>
