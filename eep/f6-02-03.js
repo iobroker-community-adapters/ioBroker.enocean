@@ -1,7 +1,7 @@
 module.exports=function(telegram) {
   var retValue = {};
 
-  if (telegram['rawByte'][12] == '3') { // T21 and NU
+  if (telegram[12] == '3') { // T21 and NU
     // message
     var dataField = parseInt(telegram.slice(2,4), 16);
 

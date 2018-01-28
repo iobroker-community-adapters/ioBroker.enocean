@@ -2,7 +2,7 @@ module.exports=function(telegram) {
   var retValue = {};
 
 
-  if (telegram['rawByte'][12] == '2') { // T21 and NU
+  if (telegram[12] == '2') { // T21 and NU
     // TODO: to be implemented
 
   } else {
