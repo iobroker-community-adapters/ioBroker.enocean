@@ -7,7 +7,7 @@ const T21_FLAG = 0b00100000;
 const NU_FLAG = 0b00010000;
 
 /**
- * @param {RadioTelegram} telegram 
+ * @param {RadioTelegram} telegram
  * @returns {{window_handle: 0 | 1 | 2}}
  */
 module.exports = function (telegram) {
@@ -17,7 +17,7 @@ module.exports = function (telegram) {
 
     const dataField = telegram.userData[0];
 
-    if (T21 && NU) {
+    if (T21 && !NU) {
         // message
         var handleOpen = ((dataField & 0xD0) == 0xC0);
         var handleTilt = ((dataField & 0xF0) == 0xD0);
