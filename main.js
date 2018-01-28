@@ -23,6 +23,10 @@ const devices = {};
 // translation matrix
 const TRANSLATION_MATRIX = require('./eep/EEP2IOB.json');
 
+// structured representation for ESP3 packets
+const ESP3Packet = require('./lib/esp3Packet').ESP3Packet;
+const RadioTelegram = require('./lib/esp3Packet').RadioTelegram;
+
 // translation functions
 const EEP_TRANSLATION = require('./eep/eepInclude.js');
 
@@ -38,9 +42,6 @@ var SERIAL_PORT = null;
 // The ESP3 parsers
 var SERIALPORT_ESP3_PARSER = null;
 
-// you have to call the adapter function and pass a options object
-// name has to be set and has to be equal to adapters folder name and main file name excluding extension
-// adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
 const adapter = utils.Adapter({
     name: 'enocean',
     ready: main
@@ -48,170 +49,173 @@ const adapter = utils.Adapter({
 
 // convert byte to hex
 function toHex(byte) {
-  return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
 }
 
 // byte array to hex
 function toHexString(byteArray) {
-  var s = '';
-  byteArray.forEach(function(byte) {
-    s += toHex(byte);
-  });
-  return s;
+    var s = '';
+    byteArray.forEach(function (byte) {
+        s += toHex(byte);
+    });
+    return s;
 }
 
-// handle packet type 1 messages
-function handleType1Message(rawMessage) {
-  let dataLength = parseInt(rawMessage.slice(2,6), 16);
-  let optionalLength = parseInt(rawMessage.slice(6,8), 16);
+/**
+ * Handle packet type 1 messages
+ * @param {ESP3Packet} espPacket 
+ */
+function handleType1Message(espPacket) {
 
-  let senderID = rawMessage.slice(12 + ((dataLength - 5) * 2), 12 + ((dataLength - 1) * 2));
+    const telegram = new RadioTelegram(espPacket);
+    const senderID = telegram.senderID;
+
     // ID is 4 bytes long and at the end of the data plus on status byte.
-  adapter.log.debug("Message for ID " + senderID + " has been received.");
-  if (senderID in devices) {  // device is known
-    if (optionalLength > 0) { // optional data including rssi are present
-      let place = 12 + 2*dataLength + 10 ;
-      let signalStrength = parseInt(rawMessage.slice(place,place+2), 16);
-      adapter.setState(senderID + '.rssi', { val: signalStrength, ack: true });
-    }
-
-    let eep = devices[senderID].native.eep;
-    let description = devices[senderID].native.desc;
-
-    let eepEntry = eep.toLowerCase().replace(/-/g,"_") + '_' + description.toLowerCase();
-    let callFunction = EEP_TRANSLATION[eepEntry];
-
-    if (callFunction != undefined) {
-      // The return value is a map consisting of variable and value
-      var varToSet = callFunction(rawMessage.slice(12,100).toString());
-      adapter.log.debug('variables to set : ' + JSON.stringify(varToSet));
-      for (var key in varToSet) {
-        let valToSet = varToSet[key];
-        if ('toggle' === valToSet) {
-          // get the state and invert it (only boolean type)
-          adapter.getState(senderID + '.' + key, function (err, state) {
-            adapter.setState(senderID + '.' + key, { val: !state, ack: true });
-            });
-        } else {
-          adapter.setState(senderID + '.' + key, { val: valToSet, ack: true });
+    adapter.log.debug("Message for ID " + senderID + " has been received.");
+    if (senderID in devices) {  // device is known
+        if (telegram.rssi != undefined) {
+            adapter.setState(senderID + '.rssi', { val: telegram.rssi, ack: true });
         }
-      }
+
+        let eep = devices[senderID].native.eep;
+        let description = devices[senderID].native.desc;
+
+        let eepEntry = eep.toLowerCase().replace(/-/g, "_") + '_' + description.toLowerCase();
+        let callFunction = EEP_TRANSLATION[eepEntry];
+
+        if (callFunction != undefined) {
+            // The return value is a map consisting of variable and value
+            var varToSet = callFunction(telegram);
+            adapter.log.debug('variables to set : ' + JSON.stringify(varToSet));
+            for (var key in varToSet) {
+                let valToSet = varToSet[key];
+                if ('toggle' === valToSet) {
+                    // get the state and invert it (only boolean type)
+                    adapter.getState(senderID + '.' + key, function (err, state) {
+                        adapter.setState(senderID + '.' + key, { val: !state, ack: true });
+                    });
+                } else {
+                    adapter.setStateChanged(senderID + '.' + key, { val: valToSet, ack: true });
+                }
+            }
+        }
     }
-  }
 }
 
-// parse the datapackage and construct a raw message
+/**
+ * Parses a data package from the ESP3 serial interface
+ * @param {Buffer} data The received data
+ */
 function parseMessage(data) {
-  adapter.log.debug("Received raw message: " + data);
+    adapter.log.debug("Received raw message: " + data.toString("hex"));
 
-  // packet type 1
-  var packetType =  parseInt(data.slice(8,10), 16);
-  switch (packetType) {
-    case 1 : // normal user data
-      handleType1Message(data);
-      break;
+    const packet = new ESP3Packet(data);
+    switch (packet.type) {
+        case 1: // normal user data
+            handleType1Message(packet);
+            break;
 
-    default:
-      adapter.log.debug("Packet type " + toHex(data.header.packetType) + " has been received, but is not handled.");
-      break;
-  }
+        default:
+            adapter.log.debug("Packet type " + toHex(packet.type) + " has been received, but is not handled.");
+            break;
+    }
 }
 
 // add a device
 function addDevice(id, manufacturer, device, eep, description) {
-  // check, if a EEP translation matrix is available
-  var eepEntry = TRANSLATION_MATRIX[eep.toLowerCase()];
+    // check, if a EEP translation matrix is available
+    var eepEntry = TRANSLATION_MATRIX[eep.toLowerCase()];
 
-  if ((eepEntry != undefined) && (eepEntry.desc[description.toLowerCase()] != undefined)){
-      // create the object provided by the translation matrix
-      var descEntry = eepEntry.desc[description.toLowerCase()];
+    if ((eepEntry != undefined) && (eepEntry.desc[description.toLowerCase()] != undefined)) {
+        // create the object provided by the translation matrix
+        var descEntry = eepEntry.desc[description.toLowerCase()];
 
-      adapter.setObjectNotExists(id, {
-          type: 'device',
-          common: {
-              name: id
-          },
-          native: {
-              id: id,
-              eep: eep,
-              manufacturer: manufacturer,
-              device:  device,
-              desc: description
-          }
-      });
+        adapter.setObjectNotExists(id, {
+            type: 'device',
+            common: {
+                name: id
+            },
+            native: {
+                id: id,
+                eep: eep,
+                manufacturer: manufacturer,
+                device: device,
+                desc: description
+            }
+        });
 
-      devices[id] = {
-          type: 'device',
-          common: {
-              name: id
-          },
-          native: {
-              id: id,
-              eep: eep,
-              manufacturer: manufacturer,
-              device:  device,
-              desc: description
-          }
+        devices[id] = {
+            type: 'device',
+            common: {
+                name: id
+            },
+            native: {
+                id: id,
+                eep: eep,
+                manufacturer: manufacturer,
+                device: device,
+                desc: description
+            }
         };
 
-      // all devices have this entry, which is provided by the gateway
-      adapter.setObjectNotExists(id + '.rssi', {
-          type: 'state',
-          common: {
-              name: 'Signal Strength',
-              role: 'value.rssi',
-              type: 'number',
-              read: true,
-              write: false
-          },
-          native: {}
-      });
+        // all devices have this entry, which is provided by the gateway
+        adapter.setObjectNotExists(id + '.rssi', {
+            type: 'state',
+            common: {
+                name: 'Signal Strength',
+                role: 'value.rssi',
+                type: 'number',
+                read: true,
+                write: false
+            },
+            native: {}
+        });
 
-          var varObjects = descEntry.iobObjects;
-          for (var variable in varObjects) {
-              var entriesToCreate = descEntry.iobObjects[variable];
-              adapter.setObjectNotExists(id + '.' + entriesToCreate['id'], {
-                  type: 'state',
-                  common: {
-                      name: entriesToCreate['common.name'],
-                      type: entriesToCreate['common.type'],
-                      min: entriesToCreate['common.min'],
-                      max: entriesToCreate['common.max'],
-                      def: entriesToCreate['common.def'],
-                      role: entriesToCreate['common.role'],
-                      states: entriesToCreate['common.states'],
-                      read: entriesToCreate['common.read'],
-                      write: entriesToCreate['common.write'],
-                      unit: entriesToCreate['common.unit']
-                  }, native: {}
-              });
+        var varObjects = descEntry.iobObjects;
+        for (var variable in varObjects) {
+            var entriesToCreate = descEntry.iobObjects[variable];
+            adapter.setObjectNotExists(id + '.' + entriesToCreate['id'], {
+                type: 'state',
+                common: {
+                    name: entriesToCreate['common.name'],
+                    type: entriesToCreate['common.type'],
+                    min: entriesToCreate['common.min'],
+                    max: entriesToCreate['common.max'],
+                    def: entriesToCreate['common.def'],
+                    role: entriesToCreate['common.role'],
+                    states: entriesToCreate['common.states'],
+                    read: entriesToCreate['common.read'],
+                    write: entriesToCreate['common.write'],
+                    unit: entriesToCreate['common.unit']
+                }, native: {}
+            });
 
-          }
-  } else {
-      adapter.log.warn('The EEP/description (' + eep + '/' + description + ') has not been found and is therefore not supported.');
-  }
+        }
+    } else {
+        adapter.log.warn('The EEP/description (' + eep + '/' + description + ') has not been found and is therefore not supported.');
+    }
 }
 
 // delete a device
 function deleteDevice(deviceId) {
-  if (deviceId in devices) {
-      adapter.log.debug(`deleting device and state ${deviceId}`);
-      // delete all states
-      adapter.getStatesOf(deviceId, (err, result) => {
-          adapter.log.debug(`got all states of ${deviceId}. err=${JSON.stringify(err)}, result=${JSON.stringify(result)}`);
-          if (result) {
-              for (const state of result) {
-                  adapter.log.debug(`deleting ${state._id}`);
-                  adapter.delState(state._id, () => {
-                      adapter.delObject(state._id);
-                  })
-              }
-          }
-          // and delete the device itself
-          adapter.log.debug(`deleting ${deviceId}`);
-          adapter.deleteDevice(deviceId);
-      });
-  }
+    if (deviceId in devices) {
+        adapter.log.debug(`deleting device and state ${deviceId}`);
+        // delete all states
+        adapter.getStatesOf(deviceId, (err, result) => {
+            adapter.log.debug(`got all states of ${deviceId}. err=${JSON.stringify(err)}, result=${JSON.stringify(result)}`);
+            if (result) {
+                for (const state of result) {
+                    adapter.log.debug(`deleting ${state._id}`);
+                    adapter.delState(state._id, () => {
+                        adapter.delObject(state._id);
+                    })
+                }
+            }
+            // and delete the device itself
+            adapter.log.debug(`deleting ${deviceId}`);
+            adapter.deleteDevice(deviceId);
+        });
+    }
 }
 
 // is called when databases are connected and adapter received configuration.
@@ -231,42 +235,42 @@ function main() {
                 const id = result[item]._id.substr(adapter.namespace.length + 1);
                 devices[id] = result[item];
             }
-          }
+        }
     });
 
     adapter.setState('info.connection', false, true);
 
     // get the list of available serial ports. Needed for win32 systems.
     sP.list(function (err, ports) {
-      AVAILABLE_PORTS = ports.map(p => p.comName);
+        AVAILABLE_PORTS = ports.map(p => p.comName);
     });
 
     try {
-      SERIAL_PORT = new sP(adapter.config.serialport, { baudRate: 57600, autoOpen: false});
-      SERIALPORT_ESP3_PARSER = SERIAL_PORT.pipe(new SERIALPORT_PARSER_CLASS());
-      SERIAL_PORT.open(function (err) {
-        if (err) {
-          throw new Error('Configured serial port is not available. Please check your Serialport setting and your USB Gateway.');
-        }
-      });
+        SERIAL_PORT = new sP(adapter.config.serialport, { baudRate: 57600, autoOpen: false });
+        SERIALPORT_ESP3_PARSER = SERIAL_PORT.pipe(new SERIALPORT_PARSER_CLASS());
+        SERIAL_PORT.open(function (err) {
+            if (err) {
+                throw new Error('Configured serial port is not available. Please check your Serialport setting and your USB Gateway.');
+            }
+        });
 
-      // the open event will always be emitted
-      SERIAL_PORT.on('open', function() {
-        adapter.log.debug("Port has been opened.");
-        adapter.setState('info.connection', true, true);
-      });
+        // the open event will always be emitted
+        SERIAL_PORT.on('open', function () {
+            adapter.log.debug("Port has been opened.");
+            adapter.setState('info.connection', true, true);
+        });
 
-//      SERIAL_PORT.on('data', function (data) {
-//        parseMessage(data);
-//      });
+        //      SERIAL_PORT.on('data', function (data) {
+        //        parseMessage(data);
+        //      });
 
-      SERIALPORT_ESP3_PARSER.on('data', function (data) {
-        parseMessage(data);
-      });
+        SERIALPORT_ESP3_PARSER.on('data', function (data) {
+            parseMessage(data);
+        });
 
 
     } catch (e) {
-      adapter.log.warn('Unable to connect to serial port. + ' + JSON.stringify(e));
+        adapter.log.warn('Unable to connect to serial port. + ' + JSON.stringify(e));
     }
 
 }
@@ -360,58 +364,58 @@ adapter.on('message', (obj) => {
                 deleteDevice(obj.message.deviceID);
                 break;
             case 'addDevice':
-              adapter.log.debug("Try to add " + JSON.stringify(obj.message.deviceID));
-              // Add checks here
+                adapter.log.debug("Try to add " + JSON.stringify(obj.message.deviceID));
+                // Add checks here
                 if (false) {
 
                 } else {
-                  var eep = obj.message.eep ;
-                  var desc = obj.message.desc;
-                  var manu = obj.message.manufacturer;
-                  var device = obj.message.device;
+                    var eep = obj.message.eep;
+                    var desc = obj.message.desc;
+                    var manu = obj.message.manufacturer;
+                    var device = obj.message.device;
 
-                  // EEP/desc or manu/device
-                  if ( ((eep === "") || (desc === "")) && (manu !== "" && device !== "")) {
-                    adapter.log.debug("Selection by manufacturer and device : " + manu + " : " + device);
-                    eep = MANUFACTURER_LIST[manu][device].eep[0].val;
-                    desc = MANUFACTURER_LIST[manu][device].eep[0].type;
-                  }
+                    // EEP/desc or manu/device
+                    if (((eep === "") || (desc === "")) && (manu !== "" && device !== "")) {
+                        adapter.log.debug("Selection by manufacturer and device : " + manu + " : " + device);
+                        eep = MANUFACTURER_LIST[manu][device].eep[0].val;
+                        desc = MANUFACTURER_LIST[manu][device].eep[0].type;
+                    }
 
-                  adapter.log.debug("EEP : " + eep + " and desc : " + desc);
-                  addDevice(obj.message.deviceID,manu,device,eep,desc);
+                    adapter.log.debug("EEP : " + eep + " and desc : " + desc);
+                    addDevice(obj.message.deviceID, manu, device, eep, desc);
                 }
                 break;
-              case 'getManufacturerList' :
+            case 'getManufacturerList':
                 adapter.log.debug("Received getManufacturerList");
                 var retVal = {};
                 for (var key in MANUFACTURER_LIST) {
-                  if (MANUFACTURER_LIST.hasOwnProperty(key)) {
-                    var manuDevice = MANUFACTURER_LIST[key];
-                    var localDeviceList = {};
-                    for (var oneDevice in manuDevice) {
-                      localDeviceList[oneDevice] = { desc: manuDevice[oneDevice].desc};
+                    if (MANUFACTURER_LIST.hasOwnProperty(key)) {
+                        var manuDevice = MANUFACTURER_LIST[key];
+                        var localDeviceList = {};
+                        for (var oneDevice in manuDevice) {
+                            localDeviceList[oneDevice] = { desc: manuDevice[oneDevice].desc };
+                        }
+                        retVal[key] = localDeviceList;
                     }
-                    retVal[key] = localDeviceList;
-                  }
                 }
                 respond({ error: null, result: retVal });
                 break;
-                case 'getEEPList' :
-                  adapter.log.debug("Received getEEPList");
-                  var retVal = {};
-                  for (var key in TRANSLATION_MATRIX) {
+            case 'getEEPList':
+                adapter.log.debug("Received getEEPList");
+                var retVal = {};
+                for (var key in TRANSLATION_MATRIX) {
                     if (TRANSLATION_MATRIX.hasOwnProperty(key)) {
-                      var eepType = TRANSLATION_MATRIX[key];
-                      var eepTypeEntries = {};
-                      for (var oneEEPType in eepType.desc) {
-                        eepTypeEntries[oneEEPType.toUpperCase()] = { desc: oneEEPType.toUpperCase()};
-                      }
-                      retVal[key] = eepTypeEntries;
+                        var eepType = TRANSLATION_MATRIX[key];
+                        var eepTypeEntries = {};
+                        for (var oneEEPType in eepType.desc) {
+                            eepTypeEntries[oneEEPType.toUpperCase()] = { desc: oneEEPType.toUpperCase() };
+                        }
+                        retVal[key] = eepTypeEntries;
                     }
-                  }
-//                  adapter.log.debug("EEP List : " + JSON.stringify(retVal));
-                  respond({ error: null, result: retVal });
-                  break;
+                }
+                //                  adapter.log.debug("EEP List : " + JSON.stringify(retVal));
+                respond({ error: null, result: retVal });
+                break;
             default:
                 adapter.log.info("Received unhandled message: " + obj.command);
                 break;
@@ -432,33 +436,33 @@ function filterSerialPorts(path) {
 
 // list serial ports
 function listSerial() {
-  var result;
+    var result;
 
-  if (PLATFORM === 'linux') {
-    // Filter out the devices that aren't serial ports
-    var devDirName = '/dev';
+    if (PLATFORM === 'linux') {
+        // Filter out the devices that aren't serial ports
+        var devDirName = '/dev';
 
-    var ports;
-    try {
-        ports = fs
-            .readdirSync(devDirName)
-            .map(function (file) {
-                return path.join(devDirName, file);
-            })
-            .filter(filterSerialPorts)
-            .map(function (port) {
-                return {comName: port};
-            });
-    } catch (e) {
-        adapter.log.error('Cannot read "' + devDirName + '": ' + e);
-        ports = [];
+        var ports;
+        try {
+            ports = fs
+                .readdirSync(devDirName)
+                .map(function (file) {
+                    return path.join(devDirName, file);
+                })
+                .filter(filterSerialPorts)
+                .map(function (port) {
+                    return { comName: port };
+                });
+        } catch (e) {
+            adapter.log.error('Cannot read "' + devDirName + '": ' + e);
+            ports = [];
+        }
+        result = ports.map(p => p.comName);
+    } else if (PLATFORM === 'win32') {
+        result = AVAILABLE_PORTS;
     }
-    result = ports.map(p => p.comName);
-  } else if (PLATFORM === 'win32') {
-    result = AVAILABLE_PORTS;
-  }
 
-  return result;
+    return result;
 }
 
 // Workaround für unvollständige Adapter-Upgrades
@@ -475,9 +479,9 @@ function ensureInstanceObjects() {
         adapter.setObjectNotExists(obj._id, obj, (err) => {
             // and set their default value
             // racing condition: setting the default value might lead to a wrong adapter state.
-//            if (!err && obj.common && obj.common.def !== null && obj.common.def !== undefined) {
-//                adapter.setState(obj._id, obj.common.def, true);
-//            }
+            //            if (!err && obj.common && obj.common.def !== null && obj.common.def !== undefined) {
+            //                adapter.setState(obj._id, obj.common.def, true);
+            //            }
         });
     }
 }

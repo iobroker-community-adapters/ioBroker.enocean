@@ -5,6 +5,8 @@
 // Copyright 2015 Rafael Kähm <rafael@kaehms.de>
 
 const Transform = require('stream').Transform;
+const Buffer_alloc = require('../lib/buffers').alloc;
+const Buffer_from = require('../lib/buffers').from;
 const BUFFER_LENGTH = 6 + 65536;
 
 class esp3parser extends Transform {
@@ -12,7 +14,7 @@ class esp3parser extends Transform {
       super();
 
       this.position = 0;
-      this.buffer = Buffer.alloc(BUFFER_LENGTH);  // to be enhanced to have a variable length buffer
+      this.buffer = Buffer_alloc(BUFFER_LENGTH);  // to be enhanced to have a variable length buffer
       this.payloadLength = 0;  // length of payload
     }
 
@@ -32,7 +34,7 @@ class esp3parser extends Transform {
             }
           } else if (this.position == ( 5 + this.payloadLength + 1)) {  // end of message + CRC
             if (this.getCrc8(this.buffer,6, this.payloadLength) == this.buffer[this.position]) { // CRC
-              this.push(this.buffer.toString('hex', 0, this.position));
+              this.push(Buffer_from(this.buffer.slice(0, this.position)));
             }
             this.position = 0;
             this.payloadLength = 0;

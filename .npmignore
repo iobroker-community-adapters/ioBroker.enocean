@@ -7,6 +7,7 @@ node_modules
 test
 .travis.yml
 appveyor.yml
+tsconfig.json
 
 # npm pack files
 iobroker.*.tgz
