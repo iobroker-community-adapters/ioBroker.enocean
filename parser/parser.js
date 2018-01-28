@@ -2,8 +2,6 @@
 /*jslint es6 */
 "use strict";
 
-// Copyright 2015 Rafael Kähm <rafael@kaehms.de>
-
 const Transform = require('stream').Transform;
 const Buffer_alloc = require('../lib/buffers').alloc;
 const Buffer_from = require('../lib/buffers').from;
