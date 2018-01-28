@@ -42,9 +42,6 @@ var SERIAL_PORT = null;
 // The ESP3 parsers
 var SERIALPORT_ESP3_PARSER = null;
 
-// you have to call the adapter function and pass a options object
-// name has to be set and has to be equal to adapters folder name and main file name excluding extension
-// adapter will be restarted automatically every time as the configuration changed, e.g system.adapter.template.0
 const adapter = utils.Adapter({
     name: 'enocean',
     ready: main
@@ -98,7 +95,7 @@ function handleType1Message(espPacket) {
                         adapter.setState(senderID + '.' + key, { val: !state, ack: true });
                     });
                 } else {
-                    adapter.setState(senderID + '.' + key, { val: valToSet, ack: true });
+                    adapter.setStateChanged(senderID + '.' + key, { val: valToSet, ack: true });
                 }
             }
         }

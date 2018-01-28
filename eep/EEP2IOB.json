@@ -27,13 +27,13 @@
     "desc": {
       "native": {
         "iobObjects": [
-          {"id": "R1_AI","common.name": "R1.AI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+          {"id": "AI","common.name": "AI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
-          {"id": "R1_AO","common.name": "R1.AO","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+          {"id": "A0","common.name": "A0","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
-          {"id": "R1_BI","common.name": "R1.BI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+          {"id": "BI","common.name": "BI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
-          {"id": "R1_BO","common.name": "R1.BO","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+          {"id": "B0","common.name": "B0","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"}
         ]
       },
@@ -53,13 +53,13 @@
     "desc": {
       "native": {
         "iobObjects": [
-          {"id": "R1_AI","common.name": "R1.AI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+          {"id": "AI","common.name": "AI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
-          {"id": "R1_AO","common.name": "R1.AO","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+          {"id": "A0","common.name": "A0","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
-          {"id": "R1_BI","common.name": "R1.BI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+          {"id": "BI","common.name": "BI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
-          {"id": "R1_BO","common.name": "R1.BO","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+          {"id": "B0","common.name": "B0","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"}
         ]
       }
