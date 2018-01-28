@@ -1,35 +1,61 @@
-module.exports=function(telegram) {
-  var retValue = {};
+"use strict";
 
-  if (telegram[12] == '3') { // T21 and NU
-    // message
-    var dataField = parseInt(telegram.slice(2,4), 16);
+// required for autocompletion
+const RadioTelegram = require('../lib/esp3Packet').RadioTelegram;
 
-    retValue[''] = false;
+const T21_FLAG = 0b00100000;
+const NU_FLAG = 0b00010000;
 
+/** @typedef {"A1"|"A0"|"B1"|"B0"} RockerAction  */
+/** @type {RockerAction[]} */
+const RockerActions = ["A1", "A0", "B1", "B0"];
 
+/**
+ * @param {RadioTelegram} telegram 
+ * @returns {{[K in RockerAction]?: boolean | "toggle"}}
+ */
+module.exports = function (telegram) {
 
-    switch(dataField) {
+  const T21 = (telegram.status & T21_FLAG) === T21_FLAG;
+  const NU = (telegram.status & NU_FLAG) === NU_FLAG;
+
+  const dataField = telegram.userData[0];
+
+  if (T21 && NU) {
+    switch (dataField) {
       case 0x30:
-        retValue['A0'] = true;
-        break;
+        return {
+          A0: true,
+          A1: false
+        };
+
       case 0x10:
-        retValue['A0'] = false;
-        retValue['A1'] = 'toggle';
-        break;
+        return {
+          A0: true,
+          A1: 'toggle'
+        };
+
       case 0x70:
-        retValue['B0'] = true;
-        retValue['B1'] = false;
-        break;
+        return {
+          B0: true,
+          B1: false
+        };
+
       case 0x50:
-        retValue['B0'] = false;
-        retValue['B1'] = true;
-        break;
+        return {
+          B0: false,
+          B1: true
+        };
+
       default:
-        retValue['B0'] = false;
-        retValue['B1'] = false;
-        break;
+        return {
+          A0: false,
+          A1: false,
+          B0: false,
+          B1: false
+        };
+
     }
   }
-  return retValue;
+
 }
