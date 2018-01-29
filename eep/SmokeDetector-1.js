@@ -7,7 +7,7 @@ const T21_FLAG = 0b00100000;
 const NU_FLAG = 0b00010000;
 
 /**
- * @param {RadioTelegram} telegram 
+ * @param {RadioTelegram} telegram
  */
 module.exports = function (telegram) {
 
@@ -16,7 +16,7 @@ module.exports = function (telegram) {
     const T21 = (telegram.status & T21_FLAG) === T21_FLAG;
     const NU = (telegram.status & NU_FLAG) === NU_FLAG;
 
-    if (T21 && NU) {
+    if (T21 && !NU) {
         // keep alive
         retValue = { keep_alive: true, alarm: false, battery_status: true };
     } else {
