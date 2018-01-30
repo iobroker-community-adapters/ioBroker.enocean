@@ -90,5 +90,14 @@
         ]
       }
     }
+  },
+  "unknown": {
+    "desc": {
+      "native": {
+        "iobObjects": [
+          {"id": "raw","common.name": "raw telegram","common.type": "string", "common.role": "value", "common.read": "true", "common.write": "false"}
+        ]
+      }
+    }
   }
 }
