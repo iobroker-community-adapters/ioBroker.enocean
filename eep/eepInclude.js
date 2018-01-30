@@ -7,7 +7,7 @@ var eepTable = {
     f6_02_03_native: require('./f6-02-03.js'),
     f6_02_01_smokedetector_1: require('./SmokeDetector-1.js'),
     f6_10_00_native: require('./f6-10-00.js'),
-    unknown_native: require('./unknown'),
+    unknown_native: require('./unknown.js'),
 };
 
 module.exports = eepTable;
