@@ -92,9 +92,11 @@ function handleType1Message(espPacket) {
                 if ('toggle' === valToSet) {
                     // get the state and invert it (only boolean type)
                     adapter.getState(senderID + '.' + key, function (err, state) {
+                        adapter.log.debug('variable to set: ' + key);
                         adapter.setState(senderID + '.' + key, { val: !state, ack: true });
                     });
                 } else {
+                    adapter.log.debug('else: ' + key);
                     adapter.setStateChanged(senderID + '.' + key, { val: valToSet, ack: true });
                 }
             }

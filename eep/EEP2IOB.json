@@ -11,6 +11,20 @@
       }
     }
   },
+  "a5-07-01" : {
+    "desc": {
+      "native": {
+        "iobObjects": [
+          {"id": "svc","common.name": "Supply voltage","common.type": "number","common.min": "0","common.max": "5","common.def": "0",
+            "common.role": "value.supply_voltage", "common.states" : "", "common.read": "true", "common.write": "false", "common.unit": "V"},
+          {"id": "presence","common.name": "Presence","common.type": "number","common.min": "0","common.max": "255","common.def": "0",
+            "common.role": "state", "common.states" : "0:false;1:true", "common.read": "true", "common.write": "false"},
+          {"id": "learn_button","common.name": "Learn Button","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "state", "common.states" : "true:teach-in telegram;false:data telegram", "common.read": "true", "common.write": "false"}
+        ]
+      }
+    }
+  },
   "d5-00-01" : {
     "desc": {
       "native": {

@@ -25,7 +25,27 @@
       ]
     }
   },
-  "Enocean": {},
+  "Enocean": {
+    "Occupancy Sensor": {
+      "desc": {
+        "en": "Occupancy Sensor",
+        "de": "Anwesenheitssensor",
+        "ru": "Датчик присутствия",
+        "pt": "Sensor de ocupação",
+        "nl": "Bezettingssensor",
+        "fr": "Capteur d'occupation",
+        "it": "Sensore di presenza",
+        "es": "Sensor de ocupación",
+        "pl": "Czujnik obłożenia"
+      },
+      "eep": [
+        {
+          "val": "A5-07-01",
+          "type": "native"
+        }
+      ]
+    }
+  },
   "Honeywell PEHA": {
     "windowcontact": {
       "desc": {
