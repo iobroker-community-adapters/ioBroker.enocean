@@ -59,17 +59,7 @@
               "pl": "początkowy adapter"
             }
           },
-        "title": {
-          "en": "Javascript/Node.js based EnOcean adapter",
-          "de": "Javascript / Node.js basierte EnOcean-Adapter",
-          "ru": "Адаптер EnOcean на основе Javascript / Node.js",
-          "pt": "Adaptador EnOcean baseado em Javascript / Node.js",
-          "nl": "Javascript / Node.js gebaseerde EnOcean-adapter",
-          "fr": "Adaptateur EnOcean basé sur Javascript / Node.js",
-          "it": "Adattatore EnOcean basato su Javascript / Node.js",
-          "es": "Adaptador EnOcean basado en JavaScript / Node.js",
-          "pl": "Standardowy adapter EnOcean oparty na standardzie Javascript / Node.js"
-        },
+        "title": "Javascript/Node.js based EnOcean adapter",
         "desc": {
           "en": "ioBroker EnOcean Adapter",
           "de": "ioBroker EnOcean Adapter",
