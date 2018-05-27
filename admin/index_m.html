@@ -288,17 +288,34 @@
               var deviceList = manufacturerList[$(this).val()];
               $('#eep').prop('selectedIndex', 0);
               $('#eep').select();
-              $('#desc').empty();
-              $('#desc').select();
+              /*$('#desc').empty();
+              $('#desc').select();*/
               var element = $('#device');
               element.empty();
               for (var key in deviceList) {
                 if (deviceList.hasOwnProperty(key)) {
                   var text = translateWord("desc", systemLang, deviceList[key]);
-                  element.append('<option value="' + key + '">' + text  + '</option>');
+                  element.append('<option value="' + key + '">' + key  + '</option>');
                 }
               }
+              $('#device').prop('selectedIndex', 0);
               $('#device').select();
+            });
+
+            $('#device').on('change',function() {
+                var deviceList = manufacturerList[$('#manufacturer').val()];
+                $('#desc').empty();
+                $('#desc').select();
+                var element = $('#desc');
+                element.empty();
+                for (var key in deviceList) {
+                    if (deviceList.hasOwnProperty(key)) {
+                        var text = translateWord("desc", systemLang, deviceList[key]);
+                        element.append('<option value="' + key + '">' + text  + '</option>');
+                    }
+                }
+                $('#desc').prop('selectedIndex', 0);
+                $('#desc').select();
             });
 
             $('#eep').on('change',function() {
@@ -319,9 +336,9 @@
 
             $('#addDeviceSubmit').click(function() {
               var id = $("#id").val().toLowerCase();
-              var eep = $("#eep").val().toLowerCase();
+              try{var eep = $("#eep").val().toLowerCase();}catch(err){}
               var manufacturer = $("#manufacturer").val();
-              var description = $("#desc").val().toLowerCase();
+              try{var description = $("#desc").val().toLowerCase();}catch(err){}
               var device = $('#device').val();
               if (null === manufacturer || undefined === manufacturer) {manufacturer = "";}
               if (null === description || undefined === description) {description = "";}
@@ -329,7 +346,6 @@
               if (null === eep || undefined === eep) {eep = "";}
               var data = { deviceID: id, eep: eep, manufacturer : manufacturer, desc : description};
               data.device = device;
-
               if (id=="" || id.length !== 8) {
                 alert("ID has the wrong format (not empty, 8 char long).");
               } else {

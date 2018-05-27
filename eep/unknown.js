@@ -11,5 +11,8 @@ const RadioTelegram = require('../lib/esp3Packet').RadioTelegram;
  * @param {RadioTelegram} telegram 
  */
 module.exports = function (telegram) {
-    return { raw: telegram.userData.toString("hex") };
+    var retValue = {};
+        retValue['raw'] = telegram.userData.toString("hex");
+        retValue['type'] = telegram.type;
+    return retValue;
 }

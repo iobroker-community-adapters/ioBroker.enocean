@@ -25,6 +25,63 @@
       }
     }
   },
+  "a5-12-01" : {
+    "desc": {
+      "native": {
+        "iobObjects": [
+          {"id": "power","common.name": "Current power","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",
+            "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false", "common.unit": "W"},
+          {"id": "energy_counter","common.name": "Cumulative power","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",
+            "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false", "common.unit": "kWh"},
+          {"id": "ti","common.name": "Tariff info","common.type": "number","common.min": "0","common.max": "15","common.def": "0",
+            "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "learn_button","common.name": "Learn Button","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "state", "common.states" : "true:teach-in telegram;false:data telegram", "common.read": "true", "common.write": "false"}
+        ]
+      }
+    }
+  },
+  "a5-38-08" : {
+    "desc": {
+      "native": {
+        "iobObjects": [
+          {"id": "gateway.01.com","common.name": "Command ID","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",
+            "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false", "common.unit": "W"},
+          {"id": "ti","common.name": "Tariff info","common.type": "number","common.min": "0","common.max": "15","common.def": "0",
+            "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "learn_button","common.name": "Learn Button","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "state", "common.states" : "true:teach-in telegram;false:data telegram", "common.read": "true", "common.write": "false"},
+          {"id": "dt","common.name": "Current value or cumulative value","common.type": "number","common.min": "0","common.max": "1","common.def": "0",
+            "common.role": "value", "common.states" : "0:kWh;1:W", "common.read": "true", "common.write": "false"},
+          {"id": "div","common.name": "Divisor for value","common.type": "number","common.min": "0","common.max": "3","common.def": "0",
+            "common.role": "value", "common.states" : "0:1;1:10;2:100;2:1000", "common.read": "true", "common.write": "false"}
+        ]
+      }
+    }
+  },
+  "d2-01-09" : {
+    "desc": {
+      "native": {
+        "iobObjects": [
+          {"id": "cmd","common.name": "Command identifier","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "state", "common.states" : "", "common.read": "true", "common.write": "true"},
+          {"id": "dv","common.name": "Dim value","common.type": "number","common.min": "0","common.max": "7","common.def": "0",
+            "common.role": "state", "common.states" : "0:Switch to new output value;1:Dim to new output value - dim timer 1;2:Dim to new output value - dim timer 2;3:Dim to new output value - dim timer 3;4:Stop dimming", "common.read": "true", "common.write": "true"},
+          {"id": "io","common.name": "I/O channel","common.type": "number","common.min": "0","common.max": "31","common.def": "0",
+            "common.role": "state", "common.states" : "1:Output channel;31:Input channel", "common.read": "true", "common.write": "true"},
+          {"id": "ov","common.name": "Output value","common.type": "number","common.min": "0","common.max": "127","common.def": "0",
+            "common.role": "state", "common.states" : "0:Off;127:Output value not valid / not applicable", "common.read": "true", "common.write": "true"},
+          {"id": "lc","common.name": "Local control","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "state", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "de","common.name": "Taught-in devices","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "state", "common.states" : "", "common.read": "true", "common.write": "true"},
+          {"id": "oc","common.name": "Over current switch off","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "state", "common.states" : "", "common.read": "true", "common.write": "false"}
+          //to be countinued
+        ]
+      }
+    }
+  },
   "d5-00-01" : {
     "desc": {
       "native": {
@@ -109,7 +166,8 @@
     "desc": {
       "native": {
         "iobObjects": [
-          {"id": "raw","common.name": "raw telegram","common.type": "string", "common.role": "value", "common.read": "true", "common.write": "false"}
+          {"id": "raw","common.name": "raw telegram","common.type": "string", "common.role": "value", "common.read": "true", "common.write": "false"},
+          {"id": "type","common.name": "type of telegram","common.type": "number", "common.role": "value", "common.states": "210:VLD;165:4BS", "common.read": "true", "common.write": "false"}
         ]
       }
     }

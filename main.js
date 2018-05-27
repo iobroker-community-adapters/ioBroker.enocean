@@ -97,7 +97,15 @@ function handleType1Message(espPacket) {
                     });
                 } else {
                     adapter.log.debug('else: ' + key);
-                    adapter.setStateChanged(senderID + '.' + key, { val: valToSet, ack: true });
+
+                    if(valToSet['unit'] != undefined){
+                        adapter.log.debug('unit is given: ' + valToSet['unit']);
+                        adapter.extendObject(senderID + '.' + key, {common:{unit: valToSet['unit']}});
+                        adapter.setState(senderID + '.' + key, { val: JSON.stringify(valToSet['val']), ack: true });
+                    }else{
+                        //adapter.setStateChanged(senderID + '.' + key, { val: valToSet, ack: true });      //nice idea but does not update the timestamp, this is necessary for my persence detectors
+                        adapter.setState(senderID + '.' + key, { val: valToSet, ack: true });
+                    }
                 }
             }
         }

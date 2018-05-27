@@ -89,6 +89,27 @@
     }
   },
   "Omnio": {},
+  "Permundo": {
+    "PSC234": {
+        "desc": {
+                "en": "Smart Plug with switching function, energy measurment and repeater ",
+                "de": "Smart Plug mit Schaltfunktion, Energiemessung und Repeater",
+                "ru": "Smart Plug с функцией переключения, измерения энергии и повторителя",
+                "pt": "Ficha Inteligente com função de comutação, medição de energia e repetidor",
+                "nl": "Smart Plug met schakelfunctie, energiemeting en repeater",
+                "fr": "Smart Plug avec fonction de commutation, mesure d'énergie et répéteur",
+                "it": "Smart Plug con funzione di commutazione, misurazione dell'energia e ripetitore",
+                "es": "Smart Plug con función de conmutación, medición de energía y repetidor",
+                "pl": "Inteligentna wtyczka z funkcją przełączania, pomiarem energii i przekaźnikiem"
+        },
+      "eep": [
+        {
+          "val": "A5-12-01",
+          "type": "native"
+        }
+      ]
+    }
+  },
   "Thermokon": {
     "SR4_7": {
       "desc": {
