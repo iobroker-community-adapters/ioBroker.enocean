@@ -19,8 +19,8 @@ module.exports = function (telegram) {
 
     if (T21 && !NU) {
         // message
-        var handleOpen = ((dataField & 0xD0) == 0xC0);
-        var handleTilt = ((dataField & 0xF0) == 0xD0);
+        let handleOpen = ((dataField & 0xD0) == 0xC0);
+        let handleTilt = ((dataField & 0xF0) == 0xD0);
 
         if (handleOpen) {
             return { window_handle: 1 };
@@ -30,4 +30,4 @@ module.exports = function (telegram) {
             return { window_handle: 0 };
         }
     }
-}
+};

@@ -34,13 +34,13 @@ const EEP_TRANSLATION = require('./eep/eepInclude.js');
 const MANUFACTURER_LIST = require("./eep/devices.json");
 
 // list of available serial ports
-var AVAILABLE_PORTS = {};
+let AVAILABLE_PORTS = {};
 
 // The serial port
-var SERIAL_PORT = null;
+let SERIAL_PORT = null;
 
 // The ESP3 parsers
-var SERIALPORT_ESP3_PARSER = null;
+let SERIALPORT_ESP3_PARSER = null;
 
 const adapter = utils.Adapter({
     name: 'enocean',
@@ -54,7 +54,7 @@ function toHex(byte) {
 
 // byte array to hex
 function toHexString(byteArray) {
-    var s = '';
+    let s = '';
     byteArray.forEach(function (byte) {
         s += toHex(byte);
     });
@@ -85,9 +85,9 @@ function handleType1Message(espPacket) {
 
         if (callFunction != undefined) {
             // The return value is a map consisting of variable and value
-            var varToSet = callFunction(telegram);
+            let varToSet = callFunction(telegram);
             adapter.log.debug('variables to set : ' + JSON.stringify(varToSet));
-            for (var key in varToSet) {
+            for (let key in varToSet) {
                 let valToSet = varToSet[key];
                 if ('toggle' === valToSet) {
                     // get the state and invert it (only boolean type)
@@ -134,11 +134,11 @@ function parseMessage(data) {
 // add a device
 function addDevice(id, manufacturer, device, eep, description) {
     // check, if a EEP translation matrix is available
-    var eepEntry = TRANSLATION_MATRIX[eep.toLowerCase()];
+    let eepEntry = TRANSLATION_MATRIX[eep.toLowerCase()];
 
     if ((eepEntry != undefined) && (eepEntry.desc[description.toLowerCase()] != undefined)) {
         // create the object provided by the translation matrix
-        var descEntry = eepEntry.desc[description.toLowerCase()];
+        let descEntry = eepEntry.desc[description.toLowerCase()];
 
         adapter.setObjectNotExists(id, {
             type: 'device',
@@ -181,9 +181,9 @@ function addDevice(id, manufacturer, device, eep, description) {
             native: {}
         });
 
-        var varObjects = descEntry.iobObjects;
-        for (var variable in varObjects) {
-            var entriesToCreate = descEntry.iobObjects[variable];
+        let varObjects = descEntry.iobObjects;
+        for (let variable in varObjects) {
+            let entriesToCreate = descEntry.iobObjects[variable];
             adapter.setObjectNotExists(id + '.' + entriesToCreate['id'], {
                 type: 'state',
                 common: {
@@ -376,13 +376,13 @@ adapter.on('message', (obj) => {
             case 'addDevice':
                 adapter.log.debug("Try to add " + JSON.stringify(obj.message.deviceID));
                 // Add checks here
-                if (false) {
+                if(false){
 
                 } else {
-                    var eep = obj.message.eep;
-                    var desc = obj.message.desc;
-                    var manu = obj.message.manufacturer;
-                    var device = obj.message.device;
+                    let eep = obj.message.eep;
+                    let desc = obj.message.desc;
+                    let manu = obj.message.manufacturer;
+                    let device = obj.message.device;
 
                     // EEP/desc or manu/device
                     if (((eep === "") || (desc === "")) && (manu !== "" && device !== "")) {
@@ -397,12 +397,12 @@ adapter.on('message', (obj) => {
                 break;
             case 'getManufacturerList':
                 adapter.log.debug("Received getManufacturerList");
-                var retVal = {};
-                for (var key in MANUFACTURER_LIST) {
+                let retVal = {};
+                for (let key in MANUFACTURER_LIST) {
                     if (MANUFACTURER_LIST.hasOwnProperty(key)) {
-                        var manuDevice = MANUFACTURER_LIST[key];
-                        var localDeviceList = {};
-                        for (var oneDevice in manuDevice) {
+                        let manuDevice = MANUFACTURER_LIST[key];
+                        let localDeviceList = {};
+                        for (let oneDevice in manuDevice) {
                             localDeviceList[oneDevice] = { desc: manuDevice[oneDevice].desc };
                         }
                         retVal[key] = localDeviceList;
@@ -412,12 +412,12 @@ adapter.on('message', (obj) => {
                 break;
             case 'getEEPList':
                 adapter.log.debug("Received getEEPList");
-                var retVal = {};
-                for (var key in TRANSLATION_MATRIX) {
+                let retVal = {};
+                for (let key in TRANSLATION_MATRIX) {
                     if (TRANSLATION_MATRIX.hasOwnProperty(key)) {
-                        var eepType = TRANSLATION_MATRIX[key];
-                        var eepTypeEntries = {};
-                        for (var oneEEPType in eepType.desc) {
+                        let eepType = TRANSLATION_MATRIX[key];
+                        let eepTypeEntries = {};
+                        for (let oneEEPType in eepType.desc) {
                             eepTypeEntries[oneEEPType.toUpperCase()] = { desc: oneEEPType.toUpperCase() };
                         }
                         retVal[key] = eepTypeEntries;
@@ -446,13 +446,13 @@ function filterSerialPorts(path) {
 
 // list serial ports
 function listSerial() {
-    var result;
+    let result;
 
     if (PLATFORM === 'linux') {
         // Filter out the devices that aren't serial ports
-        var devDirName = '/dev';
+        const devDirName = '/dev';
 
-        var ports;
+        let ports;
         try {
             ports = fs
                 .readdirSync(devDirName)

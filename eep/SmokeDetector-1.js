@@ -23,9 +23,9 @@ module.exports = function (telegram) {
         // message
         const dataField = telegram.userData[0];
 
-        var SA = dataField & 0x01;
-        var R1 = (dataField & 0xE0) >> 5;
-        var EB = ((dataField & 0x10) === 0x10);
+        let SA = dataField & 0x01;
+        let R1 = (dataField & 0xE0) >> 5;
+        let EB = ((dataField & 0x10) === 0x10);
 
         switch (R1) {
             case 0:
@@ -47,4 +47,4 @@ module.exports = function (telegram) {
         }
     }
     return retValue;
-}
+};

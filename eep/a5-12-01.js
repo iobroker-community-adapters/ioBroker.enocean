@@ -8,17 +8,17 @@ const RadioTelegram = require('../lib/esp3Packet').RadioTelegram;
  */
 module.exports = function (telegram) {
     // message
-    var retValue = {};
-    var lb = (telegram.userData[3] & 0x000008) >> 3;
-    var ti = (telegram.userData[3]) >> 4;
-    var dt = (telegram.userData[3]) >> 2;
+    let retValue = {};
+    let lb = (telegram.userData[3] & 0x000008) >> 3;
+    let ti = (telegram.userData[3]) >> 4;
+    let dt = (telegram.userData[3]) >> 2;
     dt = dt << 15;
-    var div = (telegram.userData[3]) << 14;
+    let div = (telegram.userData[3]) << 14;
     div = div >>> 16;
-    var value = telegram.userData.slice(0, 3).toString("hex");
-    var testval= telegram.userData.toString("hex");
+    let value = telegram.userData.slice(0, 3).toString("hex");
+    let testval= telegram.userData.toString("hex");
 
-    var unit;
+    let unit;
 
     if(dt == 0){
         unit = 'kWh'
@@ -27,7 +27,7 @@ module.exports = function (telegram) {
     }
 
     //get divisor for power
-    var divN;
+    let divN;
     switch(div){
         case(3):
             divN = 1;
@@ -57,4 +57,4 @@ module.exports = function (telegram) {
     }
 
     return retValue;
-}
+};

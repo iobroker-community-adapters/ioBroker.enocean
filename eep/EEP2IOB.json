@@ -77,7 +77,6 @@
             "common.role": "state", "common.states" : "", "common.read": "true", "common.write": "true"},
           {"id": "oc","common.name": "Over current switch off","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "state", "common.states" : "", "common.read": "true", "common.write": "false"}
-          //to be countinued
         ]
       }
     }
