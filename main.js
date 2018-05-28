@@ -359,6 +359,7 @@ adapter.on('message', (obj) => {
 
     // handle the message
     if (obj) {
+        let retVal = {};
         switch (obj.command) {
             case 'listSerial':
                 // enumerate serial ports for admin interface
@@ -397,7 +398,6 @@ adapter.on('message', (obj) => {
                 break;
             case 'getManufacturerList':
                 adapter.log.debug("Received getManufacturerList");
-                let retVal = {};
                 for (let key in MANUFACTURER_LIST) {
                     if (MANUFACTURER_LIST.hasOwnProperty(key)) {
                         let manuDevice = MANUFACTURER_LIST[key];
@@ -412,7 +412,6 @@ adapter.on('message', (obj) => {
                 break;
             case 'getEEPList':
                 adapter.log.debug("Received getEEPList");
-                let retVal = {};
                 for (let key in TRANSLATION_MATRIX) {
                     if (TRANSLATION_MATRIX.hasOwnProperty(key)) {
                         let eepType = TRANSLATION_MATRIX[key];
