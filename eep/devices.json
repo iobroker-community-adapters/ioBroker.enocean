@@ -44,6 +44,44 @@
           "type": "native"
         }
       ]
+    },
+    "PTM 200":{
+      "desc": {
+        "en": "Switch ",
+        "de": "Schalter",
+        "ru": "переключатель",
+        "pt": "Interruptor",
+        "nl": "Schakelaar",
+        "fr": "Commutateur",
+        "it": "Interruttore",
+        "es": "Cambiar",
+        "pl": "Przełącznik"
+      },
+      "eep": [
+        {
+          "val": "F6-06-01",
+          "type": "native"
+        }
+      ]
+    },
+    "PTM 210":{
+      "desc": {
+        "en": "Switch ",
+        "de": "Schalter",
+        "ru": "переключатель",
+        "pt": "Interruptor",
+        "nl": "Schakelaar",
+        "fr": "Commutateur",
+        "it": "Interruttore",
+        "es": "Cambiar",
+        "pl": "Przełącznik"
+      },
+      "eep": [
+        {
+          "val": "F6-06-01",
+          "type": "native"
+        }
+      ]
     }
   },
   "Honeywell PEHA": {
@@ -83,6 +121,25 @@
       "eep": [
         {
           "val": "F6-10-00",
+          "type": "native"
+        }
+      ]
+    },
+    "FU-BLS":{
+      "desc": {
+        "en": "Switch ",
+        "de": "Schalter",
+        "ru": "переключатель",
+        "pt": "Interruptor",
+        "nl": "Schakelaar",
+        "fr": "Commutateur",
+        "it": "Interruttore",
+        "es": "Cambiar",
+        "pl": "Przełącznik"
+      },
+      "eep": [
+        {
+          "val": "F6-06-01",
           "type": "native"
         }
       ]
