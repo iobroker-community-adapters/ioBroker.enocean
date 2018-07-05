@@ -59,7 +59,7 @@
       },
       "eep": [
         {
-          "val": "F6-06-01",
+          "val": "F6-02-01",
           "type": "native"
         }
       ]
@@ -78,7 +78,7 @@
       },
       "eep": [
         {
-          "val": "F6-06-01",
+          "val": "F6-02-01",
           "type": "native"
         }
       ]
@@ -103,6 +103,25 @@
           "type": "native"
         }
       ]
+    },
+    "FU-BLS":{
+      "desc": {
+        "en": "Switch ",
+        "de": "Schalter",
+        "ru": "переключатель",
+        "pt": "Interruptor",
+        "nl": "Schakelaar",
+        "fr": "Commutateur",
+        "it": "Interruttore",
+        "es": "Cambiar",
+        "pl": "Przełącznik"
+      },
+      "eep": [
+        {
+          "val": "F6-02-01",
+          "type": "native"
+        }
+      ]
     }
   },
   "Hoppe": {
@@ -121,25 +140,6 @@
       "eep": [
         {
           "val": "F6-10-00",
-          "type": "native"
-        }
-      ]
-    },
-    "FU-BLS":{
-      "desc": {
-        "en": "Switch ",
-        "de": "Schalter",
-        "ru": "переключатель",
-        "pt": "Interruptor",
-        "nl": "Schakelaar",
-        "fr": "Commutateur",
-        "it": "Interruttore",
-        "es": "Cambiar",
-        "pl": "Przełącznik"
-      },
-      "eep": [
-        {
-          "val": "F6-06-01",
           "type": "native"
         }
       ]
