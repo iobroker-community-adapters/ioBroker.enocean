@@ -11,7 +11,7 @@ module.exports = function (telegram) {
   const dataField = telegram.userData[0];
   let retValue = {};
   let lb = (dataField & 0x00000008) >> 3;
-  let value = (dataField & 0x0000FF00) >> 8;
+  let value = (dataField) >> 8;
 
   retValue['learn_button'] = (lb === 1);
   if (1 === lb) {
