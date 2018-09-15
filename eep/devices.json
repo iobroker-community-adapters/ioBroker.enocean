@@ -1,10 +1,10 @@
 {
-  "Ad Hoc Electronics": {},
-  "Afriso": {},
-  "Distech Controls": {},
+  "AD HOC ELECTRONICS": {},
+  "AFRISO EURO INDEX": {},
+  "DISTECH CONTROLS": {},
   "Easysens": {},
-  "Echoflex Solutions": {},
-  "Eltako": {
+  "ECHOFLEX SOLUTIONS": {},
+  "ELTAKO": {
     "FRW": {
       "desc": {
         "en": "FRW ( Dectomat HDv3000OS)",
@@ -25,7 +25,7 @@
       ]
     }
   },
-  "Enocean": {
+  "ENOCEAN GMBH": {
     "Occupancy Sensor": {
       "desc": {
         "en": "Occupancy Sensor",
@@ -124,7 +124,7 @@
       ]
     }
   },
-  "Hoppe": {
+  "HOPPE HOLDING AG": {
     "secusignal_windowhandle": {
       "desc": {
         "en": "SecuSignal Window Handle",
@@ -145,8 +145,8 @@
       ]
     }
   },
-  "Omnio": {},
-  "Permundo": {
+  "OMNIO AG": {},
+  "PERMUNDO GMBH": {
     "PSC234": {
         "desc": {
                 "en": "Smart Plug with switching function, energy measurment and repeater ",
@@ -167,7 +167,7 @@
       ]
     }
   },
-  "Thermokon": {
+  "THERMOKON": {
     "SR4_7": {
       "desc": {
         "en": "SR04, SR07, LC-SR04 Wireless Room Temperature Sensor",

@@ -26,12 +26,15 @@ const TRANSLATION_MATRIX = require('./eep/EEP2IOB.json');
 // structured representation for ESP3 packets
 const ESP3Packet = require('./lib/esp3Packet').ESP3Packet;
 const RadioTelegram = require('./lib/esp3Packet').RadioTelegram;
+const FourBSTeachIn = require('./lib/esp3Packet').FourBSTeachIn;
+
 
 // translation functions
 const EEP_TRANSLATION = require('./eep/eepInclude.js');
 
 // list of manufacturers, devicees and their configuration
 const MANUFACTURER_LIST = require("./eep/devices.json");
+const Enocean_manufacturer = require("./lib/manufacturer_list.js");
 
 // list of available serial ports
 let AVAILABLE_PORTS = {};
@@ -46,6 +49,10 @@ const adapter = utils.Adapter({
     name: 'enocean',
     ready: main
 });
+
+//switch to teachin mode for automatic detection of new device
+//only for developing
+let teachin = false;
 
 // convert byte to hex
 function toHex(byte) {
@@ -109,6 +116,57 @@ function handleType1Message(espPacket) {
                 }
             }
         }
+    }else if(teachin === true){
+        let tType = telegram.type;
+        adapter.log.debug('Teachin telegram type: ' + telegram.type);
+        switch(tType){
+            case 165: //4BS telegram
+                const teachinData = new FourBSTeachIn(telegram.userData);
+
+                let mfrID = teachinData.mfrID;
+
+                //Teach-In variations: 0 = without EEP and Manufacturer ID, 1 = with EEP and Manufacturer ID
+                if(teachinData.LRNtype === 1){
+                    //add leading 0 if only one digit is present
+                    let EEPFunc = teachinData.EEPFunc;
+                    EEPFunc = EEPFunc.toString();
+                    if(EEPFunc.length === 1){
+                        EEPFunc = EEPFunc.padStart(2,0);
+                    }
+                    let EEPType = teachinData.EEPType.toString();
+                    if(EEPType.length === 1){
+                        EEPType = EEPType.padStart(2,0);
+                    }
+                    let mfr = Enocean_manufacturer.getManufacturerName(mfrID);
+                    adapter.log.info(`EEP A5-${EEPFunc}-${EEPType} detected for device with ID ${telegram.senderID}, manufacturer: ${mfr}`);
+                    addDevice(telegram.senderID, mfr, null, `A5-${EEPFunc}-${EEPType}`, 'native');
+                }else if(teachinData.LRNtype=== 0){
+                    adapter.log.info(`Teach-In: 4BS (A5) Telegram without EEP and manufacturer ID detected, you have to add this device manually. The ID is "${telegram.senderID}"`);
+                    adapter.setState('info.lastID', {val: telegram.senderID, ack: true});
+                    adapter.setState('info.lastEEP', {val: 'A5', ack: true});
+                }
+                break;
+            case 246: //RPS telegram
+                adapter.log.info(`Teach-In: RPS (F6) Telegram detected, you have to add this device manually. The ID is "${telegram.senderID}"`);
+                adapter.setState('info.lastID', {val: telegram.senderID, ack: true});
+                adapter.setState('info.lastEEP', {val: 'F6', ack: true});
+                break;
+            case 212: //UTE telegram
+                adapter.log.info(`Teach-In: UTE Telegram detected, you have to add this device manually. The ID is "${telegram.senderID}"`);
+                adapter.setState('info.lastID', {val: telegram.senderID, ack: true});
+                break;
+            case 213:  //1BS telegram
+                adapter.log.info(`Teach-In: 1BS (D5) Telegram detected, you have to add this device manually. The ID is "${telegram.senderID}"`);
+                adapter.setState('info.lastID', {val: telegram.senderID, ack: true});
+                adapter.setState('info.lastEEP', {val: 'D5', ack: true});
+                break;
+            case 210:  //VLD telegram
+                adapter.log.info(`Teach-In: VLD (D2) Telegram detected, you have to add this device manually. The ID is "${telegram.senderID}"`);
+                adapter.setState('info.lastID', {val: telegram.senderID, ack: true});
+                adapter.setState('info.lastEEP', {val: 'D2', ack: true});
+                break;
+        }
+
     }
 }
 
@@ -120,6 +178,9 @@ function parseMessage(data) {
     adapter.log.debug("Received raw message: " + data.toString("hex"));
 
     const packet = new ESP3Packet(data);
+
+    adapter.log.debug("Packet type: " + packet.type);
+
     switch (packet.type) {
         case 1: // normal user data
             handleType1Message(packet);
@@ -139,11 +200,13 @@ function addDevice(id, manufacturer, device, eep, description) {
     if ((eepEntry != undefined) && (eepEntry.desc[description.toLowerCase()] != undefined)) {
         // create the object provided by the translation matrix
         let descEntry = eepEntry.desc[description.toLowerCase()];
-
+        if(device === null){
+            device = eepEntry.desc.native.devName;
+        }
         adapter.setObjectNotExists(id, {
             type: 'device',
             common: {
-                name: id
+                name: device + ' ' + manufacturer
             },
             native: {
                 id: id,
@@ -157,7 +220,7 @@ function addDevice(id, manufacturer, device, eep, description) {
         devices[id] = {
             type: 'device',
             common: {
-                name: id
+                name: device + ' ' + manufacturer
             },
             native: {
                 id: id,
@@ -359,6 +422,7 @@ adapter.on('message', (obj) => {
 
     // handle the message
     if (obj) {
+        let wait = false;
         let retVal = {};
         switch (obj.command) {
             case 'listSerial':
@@ -425,6 +489,12 @@ adapter.on('message', (obj) => {
                 //                  adapter.log.debug("EEP List : " + JSON.stringify(retVal));
                 respond({ error: null, result: retVal });
                 break;
+            case 'setTeachin':
+                teachin = obj.message;
+                if(obj.callback) adapter.sendTo(obj.from, obj.command, 'done', obj.callback);
+                wait = true;
+                break;
+
             default:
                 adapter.log.info("Received unhandled message: " + obj.command);
                 break;

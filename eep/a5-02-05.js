@@ -8,10 +8,9 @@ const RadioTelegram = require('../lib/esp3Packet').RadioTelegram;
  */
 module.exports = function (telegram) {
   // message
-  const dataField = telegram.userData[0];
   let retValue = {};
-  let lb = (dataField & 0x00000008) >> 3;
-  let value = (dataField) >> 8;
+  let lb = (telegram.userData[3] & 0x00000008) >> 3;
+  let value = telegram.userData[2];
 
   retValue['learn_button'] = (lb === 1);
   if (1 === lb) {

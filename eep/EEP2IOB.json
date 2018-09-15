@@ -2,6 +2,7 @@
   "a5-02-05" : {
     "desc": {
       "native": {
+        "devName": "Temperature Sensor Range 0°C to +40°C",
         "iobObjects": [
           {"id": "temperature","common.name": "Temperature","common.type": "number","common.min": "0","common.max": "40","common.def": "0",
             "common.role": "value.temperature", "common.states" : "", "common.read": "true", "common.write": "false", "common.unit": "°C"},
@@ -14,6 +15,7 @@
   "a5-07-01" : {
     "desc": {
       "native": {
+        "devName": "Occupancy with Supply voltage monitor",
         "iobObjects": [
           {"id": "svc","common.name": "Supply voltage","common.type": "number","common.min": "0","common.max": "5","common.def": "0",
             "common.role": "value.supply_voltage", "common.states" : "", "common.read": "true", "common.write": "false", "common.unit": "V"},
@@ -28,6 +30,7 @@
   "a5-12-01" : {
     "desc": {
       "native": {
+        "devName": "Automated Meter Reading Electricity",
         "iobObjects": [
           {"id": "power","common.name": "Current power","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",
             "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false", "common.unit": "W"},
@@ -44,6 +47,7 @@
   "a5-38-08" : {
     "desc": {
       "native": {
+        "devName": "Gateway",
         "iobObjects": [
           {"id": "gateway.01.com","common.name": "Command ID","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",
             "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false", "common.unit": "W"},
@@ -62,6 +66,7 @@
   "d2-01-09" : {
     "desc": {
       "native": {
+        "devName": "Electronic switch with Energy Measurement",
         "iobObjects": [
           {"id": "cmd","common.name": "Command identifier","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "state", "common.states" : "", "common.read": "true", "common.write": "true"},
@@ -84,6 +89,7 @@
   "d5-00-01" : {
     "desc": {
       "native": {
+        "devName": "Single Input Contact",
         "iobObjects": [
           {"id": "contact_status","common.name": "Contact Status","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "state", "common.states" : "false:closed;true:open", "common.read": "true", "common.write": "false"},
@@ -96,6 +102,7 @@
   "f6-02-01": {
     "desc": {
       "native": {
+        "devName": "Light and Blind Control - Application Style 1",
         "iobObjects": [
           {"id": "AI","common.name": "AI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
@@ -122,6 +129,7 @@
   "f6-02-02": {
     "desc": {
       "native": {
+        "devName": "Light and Blind Control - Application Style 2",
         "iobObjects": [
           {"id": "AI","common.name": "AI","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
@@ -138,6 +146,7 @@
   "f6-02-03": {
     "desc": {
       "native": {
+        "devName": "Light Control - Application Style 1",
         "iobObjects": [
           {"id": "A0","common.name": "Automatic Mode","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "switch", "common.states" : "", "common.read": "true", "common.write": "false"},
@@ -154,6 +163,7 @@
   "f6-10-00" : {
     "desc": {
       "native": {
+        "devName": "Window Handle",
         "iobObjects": [
           {"id": "window_handle","common.name": "Window Handle Status","common.type": "number","common.min": "0","common.max": "2","common.def": "0",
             "common.role": "state", "common.states" : "0:closed;1:open;2:tilt", "common.read": "true", "common.write": "false"}

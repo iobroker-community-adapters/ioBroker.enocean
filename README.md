@@ -9,6 +9,11 @@ At this time the Adapter can only recive states.
 
 ## Changelog
 
+### 0.2.0
+* Added Autodetect of devices (4BS Telegrams / A5 EEP's)
+*  Added manufacturer_list.js and fit devices.json
+*  Fix EEP A5-02-05
+
 ### 0.1.3
 * (Schluesselmeister) Added support for Admin v3
 * (Schluesselmeister) Added additional Languages
