@@ -9,6 +9,13 @@ At this time the Adapter can only recive states.
 
 ## Changelog
 
+### 0.3.0
+* Added Autodetect for UTE (Unidirectional) Teach-in
+*  Added Autodetect for Rocker Switches
+*  Added full readonly support for PSC234
+*  Added Multi-EEP support
+*  Removed no longer used Objects from info
+
 ### 0.2.0
 * Added Autodetect of devices (4BS Telegrams / A5 EEP's)
 *  Added manufacturer_list.js and fit devices.json

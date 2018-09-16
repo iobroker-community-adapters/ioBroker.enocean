@@ -111,7 +111,7 @@
 
         let namespace = 'enocean.' + instance;
         let namespaceLen = namespace.length;
-        let counter = 90;
+        let counter;
         let devices = {};
         let manufacturerList = {};
         let eepTypeList = {};
@@ -356,10 +356,12 @@
             });
 
             $('#autodetect').click(() => {
+
                 sendTo(null, "setTeachin", true, (result) => {
                     console.log('Teachin clicked');
                     $('#autodetect').addClass('disabled');
                     showMessage('If no new device is detected, check the Log.', _('Info'), 'check');
+                    counter = settings.teachinTime;
                   countdown();
                 })
             });
@@ -375,7 +377,6 @@
                     $('#autodetect').html('Autodetect');
                     $('#autodetect').removeClass('disabled');
                     counter = $('permit').val();
-                    sendTo(null, 'setTeachin', false);
                 }
             }
 

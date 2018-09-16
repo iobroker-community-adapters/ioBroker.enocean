@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "enocean",
-        "version": "0.2.0",
+        "version": "0.3.0",
         "news": {
             "0.1.3": {
                 "en": "Added F6-02-02, F6-02-03, A5-02-05 without testing. Changed EEP/desc field to drop down lists. Make Adapter compatible with node v4 and v6. Add basic manufacturer/device list to automatically select EEP/desc. Added support for Admin V3 adapter and additional languages.",
@@ -68,6 +68,17 @@
                 "it": "Aggiunto il rilevamento automatico dei dispositivi (4BS Telegram / A5 EEP's) \nAggiunto manufacturer_list.js e fit devices.json \nCorreggere EEP A5-02-05\n",
                 "es": "Autodetección de dispositivos añadida (4BS Telegrams / A5 EEP's) \nSe agregó manufacturer_list.js y fit devices.json \nRepara EEP A5-02-05\n",
                 "pl": "Dodano automatyczne wykrywanie urządzeń (4BS Telegrams / A5 EEP) \nDodano plik manufacturer_list.js i pasuje devices.json \nFix EEP A5-02-05\n"
+            },
+            "0.3.0": {
+                "en": "Added Autodetect for UTE (Unidirectional) Teach-in Added Autodetect for Rocker Switches Added full readonly support for PSC234 Added Multi-EEP support Removed no longer used Objects from info\n",
+                "de": "Autodetect für UTE (Unidirektional) Teach-In hinzugefügt \nAutodetect für Wippschalter hinzugefügt \nVollständige vollständige Unterstützung für PSC234 hinzugefügt \nUnterstützung für Multi-EEP hinzugefügt \nNicht mehr verwendete Objekte aus Info entfernt\n",
+                "ru": "Добавлен Autodetect для UTE (однонаправленный) Teach-in \nДобавлен Autodetect для Rocker Switches \nДобавлена ​​полная поддержка readonly для PSC234 \nДобавлена ​​поддержка Multi-EEP \nУдалено больше не используется Объекты из информации\n",
+                "pt": "Adicionada Autodetecção para o Ensinar UTE (Unidirecional) \nAdicionado Autodetect para Rocker Switches \nAdicionado suporte totalmente readonly para PSC234 \nAdicionado suporte multi-EEP \nRemovido não mais usado Objetos de informações\n",
+                "nl": "Autodetect toegevoegd voor UTE (Unidirectional) Teach-in \nAutodetectie toegevoegd voor tuimelschakelaars \nVolledige readonly-ondersteuning voor PSC234 toegevoegd \nMulti-EEP-ondersteuning toegevoegd \nVerwijderd niet langer gebruikt Objecten uit info\n",
+                "fr": "Ajout de la détection automatique pour l’enseignement UTE (unidirectionnel) \nAjout de la détection automatique pour les interrupteurs à bascule \nAjout du support complet en lecture seule pour PSC234 \nAjout du support Multi-EEP \nSuppression des objets non utilisés des informations\n",
+                "it": "Aggiunto Autodetect per l'autoapprendimento UTE (unidirezionale) \nAggiunto Autodetect per Rocker Switches \nAggiunto il supporto completo readonly per PSC234 \nAggiunto supporto Multi-EEP \nRimosso gli oggetti non più usati dalle informazioni\n",
+                "es": "Autodetección agregada para Teach-in UTE (Unidirectional) \nAutodetección agregada para los interruptores basculantes \nSe agregó soporte completo de solo lectura para PSC234 \nSe agregó soporte Multi-EEP \nSe eliminó Objetos no utilizados de la información\n",
+                "pl": "Dodano Autodetect dla UTE (Unidirectional) Teach-in \nDodano Autodetect dla przełączników Rocker \nDodano pełną obsługę tylko do odczytu dla PSC234 \nDodano obsługę wielu EEP \nUsunięto nieużywane obiekty z informacji\n"
             }
         },
         "title": "Javascript/Node.js based EnOcean adapter",
@@ -108,7 +119,8 @@
     },
     "native": {
         "timeout": 60,
-        "serialport": ""
+        "serialport": "",
+        "teachinTime": 60
     },
     "objects": [],
     "instanceObjects": [
@@ -134,19 +146,6 @@
             "native": {}
         },
         {
-            "_id": "info.teachin",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "Whether the driver is in teach-in mode",
-                "type": "boolean",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {}
-        },
-        {
             "_id": "info.lastLearned",
             "type": "state",
             "common": {
@@ -164,42 +163,6 @@
             "common": {
                 "role": "state",
                 "name": "Info about last forgotten device",
-                "type": "string",
-                "read": true,
-                "write": false
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.lastID",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "Info about last ID detected during teach-in",
-                "type": "string",
-                "read": true,
-                "write": false
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.lastEEP",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "Info about last EEP detected during teach-in",
-                "type": "string",
-                "read": true,
-                "write": false
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.lastMfr",
-            "type": "state",
-            "common": {
-                "role": "state",
-                "name": "Info about last Manufacturer ID detected during teach-in",
                 "type": "string",
                 "read": true,
                 "write": false

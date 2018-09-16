@@ -27,7 +27,7 @@ const TRANSLATION_MATRIX = require('./eep/EEP2IOB.json');
 const ESP3Packet = require('./lib/esp3Packet').ESP3Packet;
 const RadioTelegram = require('./lib/esp3Packet').RadioTelegram;
 const FourBSTeachIn = require('./lib/esp3Packet').FourBSTeachIn;
-
+const UTETeachIn = require('./lib/esp3Packet').UTETeachIn;
 
 // translation functions
 const EEP_TRANSLATION = require('./eep/eepInclude.js');
@@ -51,7 +51,6 @@ const adapter = utils.Adapter({
 });
 
 //switch to teachin mode for automatic detection of new device
-//only for developing
 let teachin = false;
 
 // convert byte to hex
@@ -76,94 +75,156 @@ function handleType1Message(espPacket) {
 
     const telegram = new RadioTelegram(espPacket);
     const senderID = telegram.senderID;
+    const tType = telegram.type;
 
     // ID is 4 bytes long and at the end of the data plus on status byte.
     adapter.log.debug("Message for ID " + senderID + " has been received.");
-    if (senderID in devices) {  // device is known
-        if (telegram.rssi != undefined) {
+
+    if (senderID in devices && teachin === false) {  // device is known
+
+        if (telegram.rssi !== undefined) {
             adapter.setState(senderID + '.rssi', { val: telegram.rssi, ack: true });
         }
 
         let eep = devices[senderID].native.eep;
-        let description = devices[senderID].native.desc;
+        let x = eep.length;
+        for(let i = 0; i < x; i++) {
+            let rorg = tType.toString(16);
+            let patt = new RegExp(rorg.toUpperCase());
+            let test = patt.test(eep[i]);
 
-        let eepEntry = eep.toLowerCase().replace(/-/g, "_") + '_' + description.toLowerCase();
-        let callFunction = EEP_TRANSLATION[eepEntry];
+            if(test === true){
 
-        if (callFunction != undefined) {
-            // The return value is a map consisting of variable and value
-            let varToSet = callFunction(telegram);
-            adapter.log.debug('variables to set : ' + JSON.stringify(varToSet));
-            for (let key in varToSet) {
-                let valToSet = varToSet[key];
-                if ('toggle' === valToSet) {
-                    // get the state and invert it (only boolean type)
-                    adapter.getState(senderID + '.' + key, function (err, state) {
-                        adapter.log.debug('variable to set: ' + key);
-                        adapter.setState(senderID + '.' + key, { val: !state, ack: true });
-                    });
-                } else {
-                    adapter.log.debug('else: ' + key);
+            let description = devices[senderID].native.desc;
+            let eepEntry = eep[i].toLowerCase().replace(/-/g, "_") + '_' + description.toLowerCase();
+            let callFunction = EEP_TRANSLATION[eepEntry];
 
-                    if(valToSet['unit'] != undefined){
-                        adapter.log.debug('unit is given: ' + valToSet['unit']);
-                        adapter.extendObject(senderID + '.' + key, {common:{unit: valToSet['unit']}});
-                        adapter.setState(senderID + '.' + key, { val: JSON.stringify(valToSet['val']), ack: true });
-                    }else{
-                        //adapter.setStateChanged(senderID + '.' + key, { val: valToSet, ack: true });      //nice idea but does not update the timestamp, this is necessary for my persence detectors
-                        adapter.setState(senderID + '.' + key, { val: valToSet, ack: true });
+            if (callFunction !== undefined) {
+                // The return value is a map consisting of variable and value
+                let varToSet = callFunction(telegram);
+                adapter.log.debug('variables to set : ' + JSON.stringify(varToSet));
+                for (let key in varToSet) {
+                    let valToSet = varToSet[key];
+                    if ('toggle' === valToSet) {
+                        // get the state and invert it (only boolean type)
+                        adapter.getState(senderID + '.' + key, function (err, state) {
+                            adapter.log.debug('variable to set: ' + key);
+                            adapter.setState(senderID + '.' + key, {val: !state, ack: true});
+                        });
+                    } else {
+                        adapter.log.debug('else: ' + key);
+
+                        if (valToSet['unit'] !== undefined) {
+                            adapter.log.debug('unit is given: ' + valToSet['unit']);
+                            adapter.extendObject(senderID + '.' + key, {common: {unit: valToSet['unit']}});
+                            adapter.setState(senderID + '.' + key, {val: JSON.stringify(valToSet['val']), ack: true});
+                        } else {
+                            //adapter.setStateChanged(senderID + '.' + key, { val: valToSet, ack: true });      //nice idea but does not update the timestamp, this is necessary for my persence detectors
+                            adapter.setState(senderID + '.' + key, {val: valToSet, ack: true});
+                        }
                     }
                 }
             }
+            }
         }
     }else if(teachin === true){
-        let tType = telegram.type;
+        let mfrID;
         adapter.log.debug('Teachin telegram type: ' + telegram.type);
         switch(tType){
             case 165: //4BS telegram
                 const teachinData = new FourBSTeachIn(telegram.userData);
+                if(teachinData.teachIn === 0) {
+                    mfrID = teachinData.mfrID;
 
-                let mfrID = teachinData.mfrID;
-
-                //Teach-In variations: 0 = without EEP and Manufacturer ID, 1 = with EEP and Manufacturer ID
-                if(teachinData.LRNtype === 1){
-                    //add leading 0 if only one digit is present
-                    let EEPFunc = teachinData.EEPFunc;
-                    EEPFunc = EEPFunc.toString();
-                    if(EEPFunc.length === 1){
-                        EEPFunc = EEPFunc.padStart(2,0);
+                    //Teach-In variations: 0 = without EEP and Manufacturer ID, 1 = with EEP and Manufacturer ID
+                    if (teachinData.LRNtype === 1) {
+                        //add leading 0 if only one digit is present
+                        let EEPFunc = teachinData.EEPFunc;
+                        EEPFunc = EEPFunc.toString(16);
+                        if (EEPFunc.length === 1) {
+                            EEPFunc = EEPFunc.padStart(2, 0);
+                        }
+                        let EEPType = teachinData.EEPType.toString(16);
+                        if (EEPType.length === 1) {
+                            EEPType = EEPType.padStart(2, 0);
+                        }
+                        let mfr = Enocean_manufacturer.getManufacturerName(mfrID);
+                        adapter.log.info(`EEP A5-${EEPFunc}-${EEPType} detected for device with ID ${telegram.senderID}, manufacturer: ${mfr}`);
+                        addDevice(telegram.senderID, mfr, null, `A5-${EEPFunc}-${EEPType}`, 'native');
+                    } else if (teachinData.LRNtype === 0) {
+                        adapter.log.info(`Teach-In: 4BS (A5) Telegram without EEP and manufacturer ID detected, you have to add this device manually. The ID is "${telegram.senderID}"`);
                     }
-                    let EEPType = teachinData.EEPType.toString();
-                    if(EEPType.length === 1){
-                        EEPType = EEPType.padStart(2,0);
-                    }
-                    let mfr = Enocean_manufacturer.getManufacturerName(mfrID);
-                    adapter.log.info(`EEP A5-${EEPFunc}-${EEPType} detected for device with ID ${telegram.senderID}, manufacturer: ${mfr}`);
-                    addDevice(telegram.senderID, mfr, null, `A5-${EEPFunc}-${EEPType}`, 'native');
-                }else if(teachinData.LRNtype=== 0){
-                    adapter.log.info(`Teach-In: 4BS (A5) Telegram without EEP and manufacturer ID detected, you have to add this device manually. The ID is "${telegram.senderID}"`);
-                    adapter.setState('info.lastID', {val: telegram.senderID, ack: true});
-                    adapter.setState('info.lastEEP', {val: 'A5', ack: true});
                 }
                 break;
             case 246: //RPS telegram
-                adapter.log.info(`Teach-In: RPS (F6) Telegram detected, you have to add this device manually. The ID is "${telegram.senderID}"`);
-                adapter.setState('info.lastID', {val: telegram.senderID, ack: true});
-                adapter.setState('info.lastEEP', {val: 'F6', ack: true});
+
+                let t21 = (telegram.status & 0x40) >> 6;
+                let nu  = (telegram.status & 0x20) >> 5;
+
+                switch(t21 && nu){
+                    case (1 && 1):    //EEP F6-02-xx
+                        addDevice(telegram.senderID, 'ENOCEAN GMBH', null, `F6-02-01`, 'native');
+                        adapter.log.info('EEP F6-02-xx detected');
+                        break;
+                    case (0 && 1):    //EEP F6-03-xx
+                        addDevice(telegram.senderID, 'ENOCEAN GMBH', null, `F6-02-01`, 'native');
+                        adapter.log.info('EEP F6-03-xx detected');
+                        break;
+                    case (1 && 0):    //EEP F6-10-xx
+                        addDevice(telegram.senderID, 'ENOCEAN GMBH', null, `F6-10-00`, 'native');
+                        adapter.log.info('EEP F6-10-xx detected');
+                        break;
+
+
+                }
+
+                adapter.log.info(`Teach-In: RPS (F6) Telegram detected, you have to add this device manually if it wasn't added right now. The ID is "${telegram.senderID}"`);
                 break;
             case 212: //UTE telegram
+                const teachinDataUTE = new UTETeachIn(telegram.userData);
+
+                if(teachinDataUTE.IDLSB !== null && teachinDataUTE.IDLSB !== undefined && teachinDataUTE.IDLSB !== 0){
+                    mfrID = teachinDataUTE.IDLSB;
+                }else{
+                    mfrID = teachinDataUTE.IDMSB;
+                }
+
+                //add leading 0 if only one digit is present
+                let EEPFunc = teachinDataUTE.EEPFunc;
+                EEPFunc = EEPFunc.toString();
+                if(EEPFunc.length === 1){
+                    EEPFunc = EEPFunc.padStart(2,0);
+                }
+                let EEPType = teachinDataUTE.EEPType.toString();
+                if(EEPType.length === 1){
+                    EEPType = EEPType.padStart(2,0);
+                }
+
+                let EEPRorg = teachinDataUTE.EEPRorg.toString(16).toUpperCase();
+
+                let mfr = Enocean_manufacturer.getManufacturerName(mfrID);
+
+                addDevice(telegram.senderID, mfr, null, `${EEPRorg}-${EEPFunc}-${EEPType}`, 'native');
+
                 adapter.log.info(`Teach-In: UTE Telegram detected, you have to add this device manually. The ID is "${telegram.senderID}"`);
-                adapter.setState('info.lastID', {val: telegram.senderID, ack: true});
+
                 break;
             case 213:  //1BS telegram
-                adapter.log.info(`Teach-In: 1BS (D5) Telegram detected, you have to add this device manually. The ID is "${telegram.senderID}"`);
-                adapter.setState('info.lastID', {val: telegram.senderID, ack: true});
-                adapter.setState('info.lastEEP', {val: 'D5', ack: true});
+                const teachinData1BS = new OneBSTeachIn(telegram.userData);
+
+                if(teachinData1BS.teachIn === 0) {
+                    adapter.log.info(`Teach-In: 1BS (D5) Telegram detected, you have to add this device manually. The ID is "${telegram.senderID}"`);
+                }
                 break;
             case 210:  //VLD telegram
                 adapter.log.info(`Teach-In: VLD (D2) Telegram detected, you have to add this device manually. The ID is "${telegram.senderID}"`);
-                adapter.setState('info.lastID', {val: telegram.senderID, ack: true});
-                adapter.setState('info.lastEEP', {val: 'D2', ack: true});
+                break;
+            case 198:   //Smart Ack Learn Request
+                adapter.log.info(`Teach-In: Smart Ack Learn Request (C6) Telegram detected, you have to add this device manually. The ID is "${telegram.senderID}"`);
+
+                break;
+            case 209: //MSC - Manufacturer Specific Communication telegram
+                adapter.log.info(`Teach-In: MSC (D1) Telegram detected, you have to add this device manually. The ID is "${telegram.senderID}"`);
                 break;
         }
 
@@ -210,26 +271,44 @@ function addDevice(id, manufacturer, device, eep, description) {
             },
             native: {
                 id: id,
-                eep: eep,
+                eep: [eep],
                 manufacturer: manufacturer,
                 device: device,
                 desc: description
+            }
+        }, (err, _obj)=>{
+            if(_obj === undefined) {
+                adapter.getObject(id, (err, obj) => {
+                    let oldEEP = obj.native.eep;
+                    for (let i = 0; i < oldEEP.length; i++) {
+                        let patt = new RegExp(eep);
+                        let test = patt.test(oldEEP[i]);
+                        if (test === false) {
+                            oldEEP.push(eep.toUpperCase());
+                            devices[id].eep = oldEEP;
+                            adapter.extendObject(id, {native: {eep: oldEEP}});
+                        }
+                    }
+                })
+
+            }else{
+                devices[id] = {
+                    type: 'device',
+                    common: {
+                        name: device + ' ' + manufacturer
+                    },
+                    native: {
+                        id: id,
+                        eep: [eep],
+                        manufacturer: manufacturer,
+                        device: device,
+                        desc: description
+                    }
+                };
             }
         });
 
-        devices[id] = {
-            type: 'device',
-            common: {
-                name: device + ' ' + manufacturer
-            },
-            native: {
-                id: id,
-                eep: eep,
-                manufacturer: manufacturer,
-                device: device,
-                desc: description
-            }
-        };
+
 
         // all devices have this entry, which is provided by the gateway
         adapter.setObjectNotExists(id + '.rssi', {
@@ -390,7 +469,6 @@ adapter.on('stateChange', (id, state) => {
 
 // Some message was sent to adapter instance over message box. Used by email, pushover, text2speech, ...
 adapter.on('message', (obj) => {
-
     // responds to the adapter that sent the original message
     function respond(response) {
         if (obj.callback)
@@ -452,12 +530,29 @@ adapter.on('message', (obj) => {
                     // EEP/desc or manu/device
                     if (((eep === "") || (desc === "")) && (manu !== "" && device !== "")) {
                         adapter.log.debug("Selection by manufacturer and device : " + manu + " : " + device);
-                        eep = MANUFACTURER_LIST[manu][device].eep[0].val;
-                        desc = MANUFACTURER_LIST[manu][device].eep[0].type;
+                        let x =  MANUFACTURER_LIST[manu][device].eep.length;
+                        let i = x-1;
+                        function loop(){
+                            if(i >= 0){
+
+                                eep = MANUFACTURER_LIST[manu][device].eep[i].val;
+                                desc = MANUFACTURER_LIST[manu][device].eep[i].type;
+
+                                adapter.log.debug("EEP : " + eep + " and desc : " + desc);
+                                addDevice(obj.message.deviceID, manu, device, eep, desc);
+
+                                i = i-1;
+                                setTimeout(loop, 500)
+                            }
+                        }
+                        loop();
+
+                    }else{
+                        adapter.log.debug("EEP : " + eep + " and desc : " + desc);
+                        addDevice(obj.message.deviceID, manu, device, eep, desc);
                     }
 
-                    adapter.log.debug("EEP : " + eep + " and desc : " + desc);
-                    addDevice(obj.message.deviceID, manu, device, eep, desc);
+
                 }
                 break;
             case 'getManufacturerList':
@@ -490,8 +585,13 @@ adapter.on('message', (obj) => {
                 respond({ error: null, result: retVal });
                 break;
             case 'setTeachin':
+                adapter.log.info('Teachin: ' + obj.message);
                 teachin = obj.message;
                 if(obj.callback) adapter.sendTo(obj.from, obj.command, 'done', obj.callback);
+                setTimeout(()=>{
+                    teachin = false;
+                    adapter.log.info('Teachin: false');
+                }, adapter.config.teachinTime * 1000);
                 wait = true;
                 break;
 

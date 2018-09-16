@@ -22,7 +22,7 @@
           {"id": "presence","common.name": "Presence","common.type": "number","common.min": "0","common.max": "255","common.def": "0",
             "common.role": "state", "common.states" : "0:false;1:true", "common.read": "true", "common.write": "false"},
           {"id": "learn_button","common.name": "Learn Button","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
-            "common.role": "state", "common.states" : "true:teach-in telegram;false:data telegram", "common.read": "true", "common.write": "false"}
+            "common.role": "state", "common.states" : "false:teach-in telegram;true:data telegram", "common.read": "true", "common.write": "false"}
         ]
       }
     }
@@ -39,7 +39,7 @@
           {"id": "ti","common.name": "Tariff info","common.type": "number","common.min": "0","common.max": "15","common.def": "0",
             "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false"},
           {"id": "learn_button","common.name": "Learn Button","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
-            "common.role": "state", "common.states" : "true:teach-in telegram;false:data telegram", "common.read": "true", "common.write": "false"}
+            "common.role": "state", "common.states" : "false:teach-in telegram;true:data telegram", "common.read": "true", "common.write": "false"}
         ]
       }
     }
@@ -68,19 +68,25 @@
       "native": {
         "devName": "Electronic switch with Energy Measurement",
         "iobObjects": [
-          {"id": "cmd","common.name": "Command identifier","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
-            "common.role": "state", "common.states" : "", "common.read": "true", "common.write": "true"},
+          {"id": "cmd","common.name": "Command identifier","common.type": "number","common.min": "0","common.max": "13","common.def": "",
+            "common.role": "state", "common.states" : "4:Actuator Status Response;7:Actuator Measurement Response;10:", "common.read": "true", "common.write": "true"},
           {"id": "dv","common.name": "Dim value","common.type": "number","common.min": "0","common.max": "7","common.def": "0",
             "common.role": "state", "common.states" : "0:Switch to new output value;1:Dim to new output value - dim timer 1;2:Dim to new output value - dim timer 2;3:Dim to new output value - dim timer 3;4:Stop dimming", "common.read": "true", "common.write": "true"},
           {"id": "io","common.name": "I/O channel","common.type": "number","common.min": "0","common.max": "31","common.def": "0",
-            "common.role": "state", "common.states" : "1:Output channel;31:Input channel", "common.read": "true", "common.write": "true"},
+            "common.role": "state", "common.states" : "0:Output channel;31:Input channel", "common.read": "true", "common.write": "true"},
           {"id": "ov","common.name": "Output value","common.type": "number","common.min": "0","common.max": "127","common.def": "0",
             "common.role": "state", "common.states" : "0:Off;127:Output value not valid / not applicable", "common.read": "true", "common.write": "true"},
           {"id": "lc","common.name": "Local control","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
-            "common.role": "state", "common.states" : "", "common.read": "true", "common.write": "false"},
+            "common.role": "state", "common.states" : "0:false;1:true", "common.read": "true", "common.write": "false"},
           {"id": "de","common.name": "Taught-in devices","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
             "common.role": "state", "common.states" : "", "common.read": "true", "common.write": "true"},
           {"id": "oc","common.name": "Over current switch off","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "state", "common.states" : "0:false;1:true", "common.read": "true", "common.write": "false"},
+          {"id": "el","common.name": "Error Level","common.type": "number","common.min": "0","common.max": "17","common.def": "0",
+            "common.role": "state", "common.states" : "0:Hardware OK;1:Hardware Warning;16:Hardware failure;17:Not Supported", "common.read": "true", "common.write": "false"},
+          {"id": "un","common.name": "Unit","common.type": "number","common.min": "0","common.max": "4","common.def": "3",
+            "common.role": "state", "common.states" : "0:Ws;1:Wh;2:kWh;3:W;4:kW", "common.read": "true", "common.write": "false"},
+          {"id": "mv","common.name": "Measurement value","common.type": "number","common.min": "0","common.max": "4294967295","common.def": "0",
             "common.role": "state", "common.states" : "", "common.read": "true", "common.write": "false"}
         ]
       }
