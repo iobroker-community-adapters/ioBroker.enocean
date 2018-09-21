@@ -14,7 +14,8 @@ module.exports = function (telegram) {
 
   retValue['learn_button'] = (lb === 1);
   if (1 === lb) {
-    retValue['temperature'] = Math.trunc((value * 40 / 255 + 0.05) * 10) / 10;
+    let result =  ((value -255)*(40/255));
+    retValue['temperature'] = result.toFixed(2);
   }
 
   return retValue;

@@ -44,6 +44,23 @@
       }
     }
   },
+  "a5-14-0a" : {
+    "desc": {
+      "native": {
+        "devName": "Window/Door-Sensor with Vibration detection",
+        "iobObjects": [
+          {"id": "svc","common.name": "Supply voltage","common.type": "number","common.min": "0","common.max": "5","common.def": "0",
+            "common.role": "value.supply_voltage", "common.states" : "", "common.read": "true", "common.write": "false", "common.unit": "V"},
+          {"id": "ct","common.name": "Contact","common.type": "number","common.min": "0","common.max": "17","common.def": "0",
+            "common.role": "state", "common.states" : "0:Closed;1:Tilt;16:Reserved;17:Open", "common.read": "true", "common.write": "false"},
+          {"id": "vib","common.name": "Vibration","common.type": "number","common.min": "0","common.max": "1","common.def": "0",
+            "common.role": "value", "common.states" : "0:No vibration detected;1:Vibration detected", "common.read": "true", "common.write": "false"},
+          {"id": "learn_button","common.name": "Learn Button","common.type": "boolean","common.min": "false","common.max": "true","common.def": "false",
+            "common.role": "state", "common.states" : "false:teach-in telegram;true:data telegram", "common.read": "true", "common.write": "false"}
+        ]
+      }
+    }
+  },
   "a5-38-08" : {
     "desc": {
       "native": {

@@ -26,6 +26,7 @@ const TRANSLATION_MATRIX = require('./eep/EEP2IOB.json');
 // structured representation for ESP3 packets
 const ESP3Packet = require('./lib/esp3Packet').ESP3Packet;
 const RadioTelegram = require('./lib/esp3Packet').RadioTelegram;
+const ResponseTelegram = require('./lib/esp3Packet').ResponseTelegram;
 const FourBSTeachIn = require('./lib/esp3Packet').FourBSTeachIn;
 const UTETeachIn = require('./lib/esp3Packet').UTETeachIn;
 
@@ -35,6 +36,10 @@ const EEP_TRANSLATION = require('./eep/eepInclude.js');
 // list of manufacturers, devicees and their configuration
 const MANUFACTURER_LIST = require("./eep/devices.json");
 const Enocean_manufacturer = require("./lib/manufacturer_list.js");
+
+// tools
+const crc8 = require("./lib/crc8.js");
+
 
 // list of available serial ports
 let AVAILABLE_PORTS = {};
@@ -232,6 +237,26 @@ function handleType1Message(espPacket) {
 }
 
 /**
+ * Handle packet type 2 messages
+ * @param {ESP3Packet} espPacket
+ */
+function handleType2Message(espPacket) {
+    const telegram = new ResponseTelegram(espPacket);
+
+    console.log(telegram.data);
+
+    let retCode = telegram.data[0];
+    let appVer  = (telegram.data[1] + telegram.data[2] + telegram.data[3] + telegram.data[4]);
+    let apiVer  = (telegram.data[5] + telegram.data[6] + telegram.data[7] + telegram.data[8]);
+    let chipID  = (telegram.data[9] + telegram.data[10] + telegram.data[11] + telegram.data[12]);
+    let chipVer = (telegram.data[13] + telegram.data[14] + telegram.data[15] + telegram.data[16]);
+    let appDescHex = [telegram.data[17] + telegram.data[18] + telegram.data[19] + telegram.data[20] + telegram.data[21] + telegram.data[22] + telegram.data[23] + telegram.data[24] + telegram.data[25] + telegram.data[26] + telegram.data[27] + telegram.data[28] + telegram.data[29] + telegram.data[30] + telegram.data[31] + telegram.data[32] + telegram.data[33]];
+    let appDesc = hex2a(appDescHex);
+
+    console.log('Return Code: ' + retCode + ' APP Version: ' + appVer + ' API Version: ' + apiVer + ' Chip ID: ' + chipID + ' Chip Version: ' + chipVer + ' APP description: ' + appDesc);
+}
+
+/**
  * Parses a data package from the ESP3 serial interface
  * @param {Buffer} data The received data
  */
@@ -245,6 +270,9 @@ function parseMessage(data) {
     switch (packet.type) {
         case 1: // normal user data
             handleType1Message(packet);
+            break;
+        case 2:
+            handleType2Message(packet);
             break;
 
         default:
@@ -376,6 +404,7 @@ function main() {
     // Sicherstellen, dass die instanceObjects aus io-package.json korrekt angelegt sind
     ensureInstanceObjects();
 
+
     // Eigene Objekte/States beobachten
     adapter.subscribeStates('*');
     adapter.subscribeObjects('*');
@@ -411,6 +440,19 @@ function main() {
             adapter.log.debug("Port has been opened.");
             adapter.setState('info.connection', true, true);
         });
+
+        let sync = Buffer.from([0x55]);
+        let header = Buffer.from([0x00, 0x01,0x00, 0x05]);
+        let crc8h = Buffer.from([crc8.calcCrc8(header)]);
+        let data = Buffer.from([0x03]);
+        let crc8d = Buffer.from([crc8.calcCrc8(data)]);
+
+        SERIAL_PORT.write(Buffer.concat([sync, header, crc8h, data, crc8d]), (err) => {
+                    if(err){
+                        console.log('Fehler: ' + err)
+                    }
+        });
+
 
         //      SERIAL_PORT.on('data', function (data) {
         //        parseMessage(data);
@@ -664,3 +706,13 @@ function ensureInstanceObjects() {
         });
     }
 }
+
+function hex2a(hexx) {
+    let hex = hexx.toString();//force conversion
+    console.log(hexx);
+    let str = '';
+    for (let i = 0; (i < hex.length && hex.substr(i, 2) !== '00'); i += 2)
+        str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    return str;
+}
+
