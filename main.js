@@ -243,17 +243,21 @@ function handleType1Message(espPacket) {
 function handleType2Message(espPacket) {
     const telegram = new ResponseTelegram(espPacket);
 
-    console.log(telegram.data);
-
     let retCode = telegram.data[0];
-    let appVer  = (telegram.data[1] + telegram.data[2] + telegram.data[3] + telegram.data[4]);
-    let apiVer  = (telegram.data[5] + telegram.data[6] + telegram.data[7] + telegram.data[8]);
+    let appVerMain  = telegram.data[1];
+    let appVerBeta = telegram.data[2];
+    let appVerAlpha = telegram.data[3];
+    let appVerBuild = telegram.data[4];
+    let apiVerMain  = telegram.data[5];
+    let apiVerBeta = telegram.data[6];
+    let apiVerAlpha = telegram.data[7];
+    let apiVerBuild = telegram.data[8];
     let chipID  = (telegram.data[9] + telegram.data[10] + telegram.data[11] + telegram.data[12]);
     let chipVer = (telegram.data[13] + telegram.data[14] + telegram.data[15] + telegram.data[16]);
     let appDescHex = [telegram.data[17] + telegram.data[18] + telegram.data[19] + telegram.data[20] + telegram.data[21] + telegram.data[22] + telegram.data[23] + telegram.data[24] + telegram.data[25] + telegram.data[26] + telegram.data[27] + telegram.data[28] + telegram.data[29] + telegram.data[30] + telegram.data[31] + telegram.data[32] + telegram.data[33]];
-    let appDesc = hex2a(appDescHex);
 
-    console.log('Return Code: ' + retCode + ' APP Version: ' + appVer + ' API Version: ' + apiVer + ' Chip ID: ' + chipID + ' Chip Version: ' + chipVer + ' APP description: ' + appDesc);
+
+    adapter.log.debug('Return Code: ' + retCode + ' APP Version: ' + appVerMain + '.' + appVerBeta + '.' + appVerAlpha + '.' + appVerBuild + ' API Version: ' + apiVerMain + '.' + apiVerBeta + '.' + apiVerAlpha + '.' + apiVerBuild + ' Chip ID: ' + chipID + ' Chip Version: ' + chipVer + ' APP description: ' + appDescHex);
 }
 
 /**
@@ -707,12 +711,5 @@ function ensureInstanceObjects() {
     }
 }
 
-function hex2a(hexx) {
-    let hex = hexx.toString();//force conversion
-    console.log(hexx);
-    let str = '';
-    for (let i = 0; (i < hex.length && hex.substr(i, 2) !== '00'); i += 2)
-        str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-    return str;
-}
+
 
