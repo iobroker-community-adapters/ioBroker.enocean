@@ -86,7 +86,7 @@
         "devName": "Electronic switch with Energy Measurement",
         "iobObjects": [
           {"id": "cmd","common.name": "Command identifier","common.type": "number","common.min": "0","common.max": "13","common.def": "",
-            "common.role": "state", "common.states" : "4:Actuator Status Response;7:Actuator Measurement Response;10:", "common.read": "true", "common.write": "true"},
+            "common.role": "state", "common.states" : "1:Actuator Set Output;2:Actuator Set Local;3:Actuator Status Query;4:Actuator Status Response;5:Actuator Set Measurement;6:Actuator Measurement Query;7:Actuator Measurement Response;", "common.read": "true", "common.write": "true"},
           {"id": "dv","common.name": "Dim value","common.type": "number","common.min": "0","common.max": "7","common.def": "0",
             "common.role": "state", "common.states" : "0:Switch to new output value;1:Dim to new output value - dim timer 1;2:Dim to new output value - dim timer 2;3:Dim to new output value - dim timer 3;4:Stop dimming", "common.read": "true", "common.write": "true"},
           {"id": "io","common.name": "I/O channel","common.type": "number","common.min": "0","common.max": "31","common.def": "0",

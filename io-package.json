@@ -168,6 +168,52 @@
                 "write": false
             },
             "native": {}
+        },
+        {
+            "_id": "gateway",
+            "type": "device",
+            "common": {
+                "name": "EnOcean gateway"
+            },
+            "native": {}
+        },
+        {
+            "_id": "gateway.repeater",
+            "type": "channel",
+            "common": {
+                "name": "Repeater function of the EnOcean gateway"
+            },
+            "native": {}
+        },
+        {
+            "_id": "gateway.repeater.enable",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Info about repeater modus",
+                "type": "number",
+                "min": 0,
+                "max": 2,
+                "read": true,
+                "write": true,
+                "states": "0:OFF;1:ON all;2:ON filtered"
+            },
+            "native": {}
+        },
+        {
+            "_id": "gateway.repeater.level",
+            "type": "state",
+            "common": {
+                "role": "state",
+                "name": "Info about repeater level",
+                "type": "number",
+                "min": 0,
+                "max": 2,
+                "read": true,
+                "write": true,
+                "states": "0:OFF;1:Level-1;2:Level-2"
+            },
+            "native": {}
         }
     ]
 }

@@ -57,3 +57,12 @@ module.exports = function (telegram) {
 
     return retValue;
 };
+
+module.exports = function command(id, cmd){
+
+    switch(cmd){
+        case 1:     //Actuator Set Output
+            console.log('test');
+            break;
+    }
+};

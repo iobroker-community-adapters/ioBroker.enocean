@@ -12,7 +12,6 @@ const sP = require('serialport');
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
-//const ENOCEAN_PARSER = require("serialport-enocean-parser");
 const SERIALPORT_PARSER_CLASS = require('./parser/parser.js');
 
 const PLATFORM = os.platform();
@@ -49,6 +48,9 @@ let SERIAL_PORT = null;
 
 // The ESP3 parsers
 let SERIALPORT_ESP3_PARSER = null;
+
+//Last Command code
+let lastCMD = [];
 
 const adapter = utils.Adapter({
     name: 'enocean',
@@ -242,22 +244,108 @@ function handleType1Message(espPacket) {
  */
 function handleType2Message(espPacket) {
     const telegram = new ResponseTelegram(espPacket);
-
     let retCode = telegram.data[0];
-    let appVerMain  = telegram.data[1];
-    let appVerBeta = telegram.data[2];
-    let appVerAlpha = telegram.data[3];
-    let appVerBuild = telegram.data[4];
-    let apiVerMain  = telegram.data[5];
-    let apiVerBeta = telegram.data[6];
-    let apiVerAlpha = telegram.data[7];
-    let apiVerBuild = telegram.data[8];
-    let chipID  = (telegram.data[9] + telegram.data[10] + telegram.data[11] + telegram.data[12]);
-    let chipVer = (telegram.data[13] + telegram.data[14] + telegram.data[15] + telegram.data[16]);
-    let appDescHex = [telegram.data[17] + telegram.data[18] + telegram.data[19] + telegram.data[20] + telegram.data[21] + telegram.data[22] + telegram.data[23] + telegram.data[24] + telegram.data[25] + telegram.data[26] + telegram.data[27] + telegram.data[28] + telegram.data[29] + telegram.data[30] + telegram.data[31] + telegram.data[32] + telegram.data[33]];
+    let resp = telegram.dataLength + ' ' + telegram.optionalLength;
+    console.log(resp);
+    switch(resp){
+        case '1 0':          //Standard Response
+            adapter.log.debug('Response for command ' + returnCommonCMD(lastCMD[0].toString(16)) + ' return code: ' + returnResponse(retCode.toString(16)));
+            lastCMD.splice(0, 1);
+            break;
+        case '3 0':         //Response for CO_RD_REPEATER | CO_GET_FREQUENCY_INFO
+           switch(lastCMD[0]){
+               case 0x0A:
+                   lastCMD.splice(0, 1);
+                   let rep_enable = telegram.data[1];
+                   let rep_level = telegram.data[2];
+
+                   adapter.setState('gateway.repeater.enable', {val: rep_enable, ack: true});
+                   adapter.setState('gateway.repeater.level', {val: rep_level, ack: true});
+                   break;
+               case 0x25:
+                   lastCMD.splice(0, 1);
+                   let freq;
+                   let protocol;
+
+                   switch(telegram.data[1]){
+                       case 0x00:
+                           freq = '315 Mhz';
+                           break;
+                       case 0x01:
+                           freq = '868.3 Mhz';
+                           break;
+                       case 0x02:
+                           freq = '902.875 Mhz';
+                           break;
+                       case 0x03:
+                           freq = '925 Mhz';
+                           break;
+                       case 0x04:
+                           freq = '928 Mhz';
+                           break;
+                       case 0x20:
+                           freq = '2.4 Ghz';
+                           break;
+                   }
+
+                   switch(telegram.data[2]){
+                       case 0x00:
+                           protocol = 'ERP1';
+                           break;
+                       case 0x01:
+                           protocol = 'ERP2';
+                           break;
+                       case 0x10:
+                           protocol = '802.15.4';
+                           break;
+                       case 0x20:
+                           protocol = 'Bluetooth';
+                           break;
+                       case 0x30:
+                           protocol = 'Long Range';
+                           break;
+                   }
+
+                   adapter.extendObject('gateway', {
+                       native: {
+                           "Frequency":  freq,
+                           "Protocol":  protocol
+                       }});
+           }
 
 
-    adapter.log.debug('Return Code: ' + retCode + ' APP Version: ' + appVerMain + '.' + appVerBeta + '.' + appVerAlpha + '.' + appVerBuild + ' API Version: ' + apiVerMain + '.' + apiVerBeta + '.' + apiVerAlpha + '.' + apiVerBuild + ' Chip ID: ' + chipID + ' Chip Version: ' + chipVer + ' APP description: ' + appDescHex);
+
+            break;
+        case '33 0':       //Response for CO_RD_VERSION
+            lastCMD.splice(0, 1);
+
+            let appVerMain  = telegram.data[1];
+            let appVerBeta = telegram.data[2];
+            let appVerAlpha = telegram.data[3];
+            let appVerBuild = telegram.data[4];
+            let apiVerMain  = telegram.data[5];
+            let apiVerBeta = telegram.data[6];
+            let apiVerAlpha = telegram.data[7];
+            let apiVerBuild = telegram.data[8];
+            let chipID  = (telegram.data[9] + telegram.data[10] + telegram.data[11] + telegram.data[12]);
+            let chipVer = (telegram.data[13] + telegram.data[14] + telegram.data[15] + telegram.data[16]);
+            let appDescHex = [telegram.data[17] + telegram.data[18] + telegram.data[19] + telegram.data[20] + telegram.data[21] + telegram.data[22] + telegram.data[23] + telegram.data[24] + telegram.data[25] + telegram.data[26] + telegram.data[27] + telegram.data[28] + telegram.data[29] + telegram.data[30] + telegram.data[31] + telegram.data[32] + telegram.data[33]];
+
+
+            adapter.log.debug('Return Code: ' + retCode + ' APP Version: ' + appVerMain + '.' + appVerBeta + '.' + appVerAlpha + '.' + appVerBuild + ' API Version: ' + apiVerMain + '.' + apiVerBeta + '.' + apiVerAlpha + '.' + apiVerBuild + ' Chip ID: ' + chipID + ' Chip Version: ' + chipVer + ' APP description: ' + appDescHex);
+            adapter.extendObject('gateway', {
+                native: {
+                    "APP Version":  appVerMain + '.' + appVerBeta + '.' + appVerAlpha + '.' + appVerBuild,
+                    "API Version":  apiVerMain + '.' + apiVerBeta + '.' + apiVerAlpha + '.' + apiVerBuild,
+                    "Chip ID":      chipID,
+                    "Chip Version": chipVer
+                }});
+            break;
+
+    }
+    console.log('Data length: ' + telegram.dataLength + ' Optional length:' + telegram.optionalLength);
+
+
 }
 
 /**
@@ -445,17 +533,7 @@ function main() {
             adapter.setState('info.connection', true, true);
         });
 
-        let sync = Buffer.from([0x55]);
-        let header = Buffer.from([0x00, 0x01,0x00, 0x05]);
-        let crc8h = Buffer.from([crc8.calcCrc8(header)]);
-        let data = Buffer.from([0x03]);
-        let crc8d = Buffer.from([crc8.calcCrc8(data)]);
-
-        SERIAL_PORT.write(Buffer.concat([sync, header, crc8h, data, crc8d]), (err) => {
-                    if(err){
-                        console.log('Fehler: ' + err)
-                    }
-        });
+        getGatewayInfo();
 
 
         //      SERIAL_PORT.on('data', function (data) {
@@ -510,6 +588,8 @@ adapter.on('objectChange', (id, obj) => {
 // is called if a subscribed state changes
 adapter.on('stateChange', (id, state) => {
     if (state && !state.ack && id.startsWith(adapter.namespace)) {
+        console.log(id + ' ' + JSON.stringify(state));
+
     }
 });
 
@@ -711,5 +791,136 @@ function ensureInstanceObjects() {
     }
 }
 
+function getGatewayInfo(){
+    let header = Buffer.from([0x00, 0x01,0x00, 0x05]);
+    let data;
 
+
+    //CO_RD_VERSION
+    data = Buffer.from([0x03]);
+    sendCMDtoGateway(header, data);
+    lastCMD.push(0x03);
+
+    //CO_RD_REPEATER
+    data = Buffer.from([0x0A]);
+    sendCMDtoGateway(header, data);
+    lastCMD.push(0x0A);
+
+
+    //CO_GET_FREQUENCY_INFO
+        data = Buffer.from([0x25]);
+        sendCMDtoGateway(header, data);
+        lastCMD.push(0x25);
+
+
+
+}
+
+
+function sendCMDtoGateway(header, data){
+    const sync = Buffer.from([0x55]);
+    let crc8h = Buffer.from([crc8.calcCrc8(header)]);
+    let crc8d = Buffer.from([crc8.calcCrc8(data)]);
+
+    SERIAL_PORT.write(Buffer.concat([sync, header, crc8h, data, crc8d]), (err) => {
+        if(err){
+            console.log('Error: ' + err)
+        }
+    });
+}
+
+function returnResponse(code){
+    const text = {  0: "RET_OK",
+                    1: "RET_ERROR",
+                    2: "RET_NOT_SUPPORTED",
+                    3: "RET_WRONG_PARAM",
+                    4: "RET_OPERATION_DENIED",
+                    5: "RET_LOCK_SET",
+                    6: "RET_BUFFER_TO_SMALL",
+                    7: "RET_NO_FREE_BUFFER"
+                };
+    return(text[code]);
+}
+
+function returnPacketType(cmd){
+    const types = {
+        0x01: "RADIO_ERP1",
+        0x02: "RESPONSE",
+        0x03: "RADIO_SUB_TEL",
+        0x04: "EVENT",
+        0x05: "COMMON_COMMAND",
+        0x06: "SMART_ACK_COMMAND",
+        0x07: "REMOTE_MAN_COMMAND",
+        0x09: "RADIO_MESSAGE",
+        0x0A: "RADIO_ERP2",
+        0x10: "RADIO_805_15_4",
+        0x11: "COMMAND_2_4"
+    };
+    return(types[cmd]);
+}
+
+function returnEvent(event){
+    const events = {
+        1: "SA_RECLAIM_NOT_SUCCESSFUL",
+        2: "SA_CONFIRM_LEARN",
+        3: "SA_LEARN_ACK",
+        4: "CO_READY",
+        5: "CO_EVENTS_SECUREDEVICES",
+        6: "CO_DUTYCYCLE_LIMIT",
+        7: "CO_TRANSMIT_FAILED"
+    };
+    return(events[event]);
+}
+
+function returnCommonCMD(cmd){
+    const cCmds = {
+        1: "CO_WR_SLEEP",
+        2: "CO_WR_RESET",
+        3: "CO_RD_VERSION",
+        4: "CO_RD_SYS_LOG",
+        5: "CO_WR_SYS_LOG",
+        6: "CO_WR_BIST",
+        7: "CO_WR_IDBASE",
+        8: "CO_RD_IDBASE",
+        9: "CO_WR_REÜEATER",
+        10: "CO_RD_REPEATER",
+        11: "CO_WR_FILTER_ADD",
+        12: "CO_WR_FILTER_DEL",
+        13: "CO_WR_FILTER_DEL_ALL",
+        14: "CO_WR_FILTER_ENABLE",
+        15: "CO_RD_FILTER",
+        16: "CO_WR_WAIT_MATURITY",
+        17: "CO_WR_SUBTEL",
+        18: "CO_WR_MEM",
+        19: "CO_RD_MEM",
+        20: "CO_RD_MEM_ADDRESS",
+        21: "CO_RD_SECURITY",
+        22: "CO_WR_SECURITY",
+        23: "CO_WR_LEARNMODE",
+        24: "CO_RD_LEARNMODE",
+        25: "CO_WR_SECUREDEVICE_ADD",
+        26: "CO_WR_SECUREDEVICE_DEL",
+        27: "CO_RD_SECUREDEVICE_BY_INDEX",
+        28: "CO_WR_MODE",
+        29: "CO_RD_NUMSECUREDEVICES",
+        30: "COR_RD_SECUREDEVICE_BY_ID",
+        31: "CO_WR_SECUREDEVICE_ADD_PSK",
+        32: "CO_WR_SECUREDEVICE_SENDTEACHIN",
+        33: "CO_WR_TEMPORARY_RLC_WINDOW",
+        34: "CO_RD_SECUREDEVICE_PSK",
+        35: "CO_RD_DUTYCYCLE_LIMIT",
+        36: "CO_SET_BAUDRATE",
+        37: "CO_GET_FREQUENCY_INFO",
+
+        39: "CO_GET_STEPCODE",
+
+        46: "CO_WR_REMAN_CODE",
+        47: "CO_WR_STARTUP_DELAY",
+        48: "CO_WR_REMAN_REPEATING",
+        49: "CO_RD_REMAN_REPEATING",
+        50: "CO_SET_NOISTHRESHOLD",
+        51: "CO_GET_NOISETHRESHOLD"
+    };
+    return(cCmds[cmd]);
+}
 
