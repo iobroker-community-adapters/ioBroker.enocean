@@ -732,7 +732,7 @@ adapter.on('message', (obj) => {
 // filter serial deviceesfunction filterSerialPorts(path) {
 function filterSerialPorts(path) {
     // get only serial port names
-    if (!(/(tty(ACM|USB|AMA|MFD|Enocean|enocean|EnOcean)|rfcomm)/).test(path)) return false;
+    if (!(/(tty(ACM|USB|AMA|MFD|Enocean|enocean|EnOcean|\.usbserial-)|rfcomm)/).test(path)) return false;
 
     return fs
         .statSync(path)
@@ -743,7 +743,7 @@ function filterSerialPorts(path) {
 function listSerial() {
     let result;
 
-    if (PLATFORM === 'linux') {
+    if (PLATFORM === 'linux' || PLATFORM === 'darwin') {
         // Filter out the devices that aren't serial ports
         const devDirName = '/dev';
 
