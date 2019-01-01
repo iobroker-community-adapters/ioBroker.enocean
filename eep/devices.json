@@ -42,6 +42,25 @@
           "type": "native"
         }
       ]
+    },
+    "FSB61NP": {
+      "desc": {
+        "en": "FSB61NP (Shading elements and roller shutters)",
+        "de": "FSB61NP (Shading elements and roller shutters)",
+        "ru": "FSB61NP (Shading elements and roller shutters)",
+        "pt": "FSB61NP (Shading elements and roller shutters)",
+        "nl": "FSB61NP (Shading elements and roller shutters)",
+        "fr": "FSB61NP (Shading elements and roller shutters)",
+        "it": "FSB61NP (Shading elements and roller shutters)",
+        "es": "FSB61NP (Shading elements and roller shutters)",
+        "pl": "FSB61NP (Shading elements and roller shutters)"
+      },
+      "eep": [
+        {
+          "val": "A5-3F-7F",
+          "type": "native"
+        }
+      ]
     }
   },
   "ENOCEAN GMBH": {
