@@ -23,6 +23,25 @@
           "type": "smokedetector_1"
         }
       ]
+    },
+    "FT55": {
+      "desc": {
+        "en": "FT55 (Wireless Pushbuttons)",
+        "de": "FT55 (Wireless Pushbuttons)",
+        "ru": "FT55 (Wireless Pushbuttons)",
+        "pt": "FT55 (Wireless Pushbuttons)",
+        "nl": "FT55 (Wireless Pushbuttons)",
+        "fr": "FT55 (Wireless Pushbuttons)",
+        "it": "FT55 (Wireless Pushbuttons)",
+        "es": "FT55 (Wireless Pushbuttons)",
+        "pl": "FT55 (Wireless Pushbuttons)"
+      },
+      "eep": [
+        {
+          "val": "F6-02-01",
+          "type": "native"
+        }
+      ]
     }
   },
   "ENOCEAN GMBH": {
