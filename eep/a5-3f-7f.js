@@ -17,7 +17,7 @@ module.exports = function (telegram) {
 
   let retValue = {};
 
-  let RORG = telegram.type.toString(16);
+  let RORG = telegram.type;
   
   // Distinguish between BS4 (a5) and RPS (f6)
 
