@@ -7,7 +7,7 @@ const T21_FLAG = 0b00100000;
 const NU_FLAG = 0b00010000;
 
 /** @typedef {"byte0"|"byte1"|"byte2"|"byte3"} DataPayload  */
-/** @type {DataPayload[]} */
+// /** @type {DataPayload[]} */
 const DataPayload = ["byte0", "byte1", "byte2", "byte3"];
 
 /**
