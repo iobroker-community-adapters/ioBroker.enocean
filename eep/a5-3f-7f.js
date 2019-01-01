@@ -17,24 +17,24 @@ module.exports = function (telegram) {
 
   let retValue = {};
 
-  let RORG = telegram.type.toString("hex");
+  let RORG = telegram.type.toString(16);
   
   // Distinguish between BS4 (a5) and RPS (f6)
 
   if (RORG == 0xA5){ // BS4
-    retValue['type'] = telegram.type.toString("hex");
-    retValue['data'] = telegram.userData.toString("hex");
-    retValue['status'] = telegram.status.toString("hex");
+    retValue['type'] = telegram.type.toString(16);
+    retValue['data'] = telegram.userData.toString(16);
+    retValue['status'] = telegram.status.toString(16);
     retValue = {"type": telegram.type, "data": telegram.userData, "status": telegram.status};
   } else if (RORG == 0xF6) { // RPS
-    retValue['type'] = telegram.type.toString("hex");
-    retValue['data'] = telegram.userData.toString("hex");
-    retValue['status'] = telegram.status.toString("hex");
+    retValue['type'] = telegram.type.toString(16);
+    retValue['data'] = telegram.userData.toString(16);
+    retValue['status'] = telegram.status.toString(16);
     retValue = {"type": telegram.type, "data": telegram.userData, "status": telegram.status};
   } else { // unknown
-    retValue['type'] = telegram.type.toString("hex");
-    retValue['data'] = telegram.userData.toString("hex");
-    retValue['status'] = telegram.status.toString("hex");
+    retValue['type'] = telegram.type.toString(16);
+    retValue['data'] = telegram.userData.toString(16);
+    retValue['status'] = telegram.status.toString(16);
     retValue = {"type": telegram.type, "data": telegram.userData, "status": telegram.status};
   }
 
