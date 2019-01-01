@@ -22,19 +22,10 @@ module.exports = function (telegram) {
   // Distinguish between BS4 (a5) and RPS (f6)
 
   if (RORG == 0xA5){ // BS4
-    retValue['type'] = telegram.type.toString(16);
-    retValue['data'] = telegram.userData.toString(16);
-    retValue['status'] = telegram.status.toString(16);
     retValue = {"type": telegram.type, "data": telegram.userData, "status": telegram.status};
   } else if (RORG == 0xF6) { // RPS
-    retValue['type'] = telegram.type.toString(16);
-    retValue['data'] = telegram.userData.toString(16);
-    retValue['status'] = telegram.status.toString(16);
     retValue = {"type": telegram.type, "data": telegram.userData, "status": telegram.status};
   } else { // unknown
-    retValue['type'] = telegram.type.toString(16);
-    retValue['data'] = telegram.userData.toString(16);
-    retValue['status'] = telegram.status.toString(16);
     retValue = {"type": telegram.type, "data": telegram.userData, "status": telegram.status};
   }
 
