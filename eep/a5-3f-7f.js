@@ -17,8 +17,24 @@ module.exports = function (telegram) {
 
   let retValue = {};
 
-  const RORG = telegram.type;
-  retValue = {"RORG": RORG};
+  let RORG = telegram.type.toString("hex");
+  
+  // Distinguish between BS4 (a5) and RPS (f6)
+
+  if (RORG === 0xA5){ // BS4
+    retValue['type'] = telegram.type.toString("hex");
+    retValue['data'] = telegram.userData.toString("hex");
+    retValue['status'] = telegram.status.toString("hex");
+  } else if (RORG === 0xF6) { // RPS
+    retValue['type'] = telegram.type.toString("hex");
+    retValue['data'] = telegram.userData.toString("hex");
+    retValue['status'] = telegram.status.toString("hex");
+  } else { // unknown
+    retValue['type'] = telegram.type.toString("hex");
+    retValue['data'] = telegram.userData.toString("hex");
+    retValue['status'] = telegram.status.toString("hex");
+  }
+
 //   const T21 = (telegram.status & T21_FLAG) === T21_FLAG;
 //   const NU = (telegram.status & NU_FLAG) === NU_FLAG;
 
