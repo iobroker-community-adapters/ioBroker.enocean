@@ -25,14 +25,17 @@ module.exports = function (telegram) {
     retValue['type'] = telegram.type.toString("hex");
     retValue['data'] = telegram.userData.toString("hex");
     retValue['status'] = telegram.status.toString("hex");
+    retValue = {"type": telegram.type, "data": telegram.userData, "status": telegram.status};
   } else if (RORG == 0xF6) { // RPS
     retValue['type'] = telegram.type.toString("hex");
     retValue['data'] = telegram.userData.toString("hex");
     retValue['status'] = telegram.status.toString("hex");
+    retValue = {"type": telegram.type, "data": telegram.userData, "status": telegram.status};
   } else { // unknown
     retValue['type'] = telegram.type.toString("hex");
     retValue['data'] = telegram.userData.toString("hex");
     retValue['status'] = telegram.status.toString("hex");
+    retValue = {"type": telegram.type, "data": telegram.userData, "status": telegram.status};
   }
 
 //   const T21 = (telegram.status & T21_FLAG) === T21_FLAG;
