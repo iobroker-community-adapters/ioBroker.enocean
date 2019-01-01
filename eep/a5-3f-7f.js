@@ -21,11 +21,11 @@ module.exports = function (telegram) {
   
   // Distinguish between BS4 (a5) and RPS (f6)
 
-  if (RORG === 0xA5){ // BS4
+  if (RORG == 0xA5){ // BS4
     retValue['type'] = telegram.type.toString("hex");
     retValue['data'] = telegram.userData.toString("hex");
     retValue['status'] = telegram.status.toString("hex");
-  } else if (RORG === 0xF6) { // RPS
+  } else if (RORG == 0xF6) { // RPS
     retValue['type'] = telegram.type.toString("hex");
     retValue['data'] = telegram.userData.toString("hex");
     retValue['status'] = telegram.status.toString("hex");
