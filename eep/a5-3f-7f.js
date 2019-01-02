@@ -25,23 +25,25 @@ module.exports = function (telegram) {
   const DataByte3 = telegram.userData.data[3].toString(16);
   const Status = telegram.status.toString(16);
   
-  // Distinguish between BS4 (a5) and RPS (f6)
-  if (RORG == 0xA5){ 
-    // BS4
-    retValue['data1'] = telegram.userData.data[0];
-    retValue['data2'] = telegram.userData.data[1];
-    retValue['data3'] = telegram.userData.data[2];
-    retValue['data4'] = telegram.userData.data[3];
-    retValue = {"type": RORG, "byte0": DataByte0, "byte1": DataByte1, "byte2": DataByte2, "byte3": DataByte3, "ststus": Status};
+  retValue = {"type": RORG, "type_int": telegram.type};
 
-  } else if (RORG == 0xF6) { 
-    // RPS
-    retValue = {"type": RORG, "byte0": DataByte0, "byte1": DataByte1, "byte2": DataByte2, "byte3": DataByte3, "ststus": Status};
+  // Distinguish between BS4 (a5) and RPS (f6)
+//   if (RORG == 0xA5){ 
+//     // BS4
+//     retValue['data1'] = telegram.userData.data[0];
+//     retValue['data2'] = telegram.userData.data[1];
+//     retValue['data3'] = telegram.userData.data[2];
+//     retValue['data4'] = telegram.userData.data[3];
+//     retValue = {"type": RORG, "byte0": DataByte0, "byte1": DataByte1, "byte2": DataByte2, "byte3": DataByte3, "ststus": Status};
+
+//   } else if (RORG == 0xF6) { 
+//     // RPS
+//     retValue = {"type": RORG, "byte0": DataByte0, "byte1": DataByte1, "byte2": DataByte2, "byte3": DataByte3, "ststus": Status};
   
-  } else { 
-    // unknown -> Debug output of data
-    retValue = {"type": RORG, "byte0": DataByte0, "byte1": DataByte1, "byte2": DataByte2, "byte3": DataByte3, "ststus": Status};
-  }
+//   } else { 
+//     // unknown -> Debug output of data
+//     retValue = {"type": RORG, "byte0": DataByte0, "byte1": DataByte1, "byte2": DataByte2, "byte3": DataByte3, "ststus": Status};
+//   }
 
   return retValue;
 };
