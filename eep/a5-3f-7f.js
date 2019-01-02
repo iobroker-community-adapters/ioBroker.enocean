@@ -33,10 +33,10 @@ module.exports = function (telegram) {
     retValue['data3'] = telegram.userData.data[2];
     retValue['data4'] = telegram.userData.data[3];
     retValue = {"type": RORG, "byte0": DataByte0, "byte1": DataByte1, "byte2": DataByte2, "byte3": DataByte3, "ststus": Status};
-    
+
   } else if (RORG == 0xF6) { 
     // RPS
-    
+    retValue = {"type": RORG, "byte0": DataByte0, "byte1": DataByte1, "byte2": DataByte2, "byte3": DataByte3, "ststus": Status};
   
   } else { 
     // unknown -> Debug output of data
