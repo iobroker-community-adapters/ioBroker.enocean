@@ -22,7 +22,7 @@ module.exports = function (telegram) {
   const DataByte1 = telegram.userData.data[1].toString(16);
   const DataByte2 = telegram.userData.data[2].toString(16);
   const DataByte3 = telegram.userData.data[3].toString(16);
-  const Status = telegram.status.toString(16)};
+  const Status = telegram.status.toString(16);
   
   // Distinguish between BS4 (a5) and RPS (f6)
   if (RORG == 0xA5){ 
