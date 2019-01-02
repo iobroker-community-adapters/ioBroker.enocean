@@ -18,7 +18,7 @@ module.exports = function (telegram) {
   let retValue = {};
 
   const RORG = telegram.type.toString(16);
-  console.log('RORG: ' + RORG);
+  
   const DataByte0 = telegram.userData.data[0].toString(16);
   const DataByte1 = telegram.userData.data[1].toString(16);
   const DataByte2 = telegram.userData.data[2].toString(16);
@@ -32,19 +32,15 @@ module.exports = function (telegram) {
     retValue['data2'] = telegram.userData.data[1];
     retValue['data3'] = telegram.userData.data[2];
     retValue['data4'] = telegram.userData.data[3];
-
+    retValue = {"type": RORG, "byte0": DataByte0, "byte1": DataByte1, "byte2": DataByte2, "byte3": DataByte3, "ststus": Status};
+    
   } else if (RORG == 0xF6) { 
     // RPS
     
   
   } else { 
     // unknown -> Debug output of data
-    retValue['type'] = RORG;
-    retValue['byte0'] = DataByte0;
-    retValue['byte1'] = DataByte1;
-    retValue['byte2'] = DataByte2;
-    retValue['byte3'] = DataByte3;
-    retValue['status'] = Status;
+    retValue = {"type": RORG, "byte0": DataByte0, "byte1": DataByte1, "byte2": DataByte2, "byte3": DataByte3, "ststus": Status};
   }
 
   return retValue;
