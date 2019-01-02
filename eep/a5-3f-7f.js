@@ -18,6 +18,7 @@ module.exports = function (telegram) {
   let retValue = {};
 
   const RORG = telegram.type.toString(16);
+  console.log('RORG: ' + RORG);
   const DataByte0 = telegram.userData.data[0].toString(16);
   const DataByte1 = telegram.userData.data[1].toString(16);
   const DataByte2 = telegram.userData.data[2].toString(16);
