@@ -17,45 +17,34 @@ module.exports = function (telegram) {
 
   let retValue = {};
 
-  let RORG = telegram.type;
+  const RORG = telegram.type.toString(16);
+  const DataByte0 = telegram.userData[0].toString(16);
+  const DataByte1 = telegram.userData[1].toString(16);
+  const DataByte2 = telegram.userData[2].toString(16);
+  const DataByte3 = telegram.userData[3].toString(16);
+  const Status = telegram.status.toString(16)};
   
   // Distinguish between BS4 (a5) and RPS (f6)
+  if (RORG == 0xA5){ 
+    // BS4
+    retValue['data1'] = telegram.userData[0];
+    retValue['data2'] = telegram.userData[1];
+    retValue['data3'] = telegram.userData[2];
+    retValue['data4'] = telegram.userData[3];
 
-  if (RORG == 0xA5){ // BS4
-    retValue = {"type": telegram.type, "data": telegram.userData, "status": telegram.status};
-  } else if (RORG == 0xF6) { // RPS
-    retValue = {"type": telegram.type, "data": telegram.userData, "status": telegram.status};
-  } else { // unknown
-    retValue = {"type": telegram.type, "data": telegram.userData, "status": telegram.status};
+  } else if (RORG == 0xF6) { 
+    // RPS
+    
+  
+  } else { 
+    // unknown -> Debug output of data
+    retValue['type'] = RORG;
+    retValue['byte0'] = DataByte0;
+    retValue['byte1'] = DataByte1;
+    retValue['byte2'] = DataByte2;
+    retValue['byte3'] = DataByte3;
+    retValue['status'] = Status;
   }
 
-//   const T21 = (telegram.status & T21_FLAG) === T21_FLAG;
-//   const NU = (telegram.status & NU_FLAG) === NU_FLAG;
-
-//   const dataField = telegram.userData[0];
-  
-//   if (T21 && !NU) {
-//     // this happens when the buttons are released
-//     const numButtons = (dataField & 0xE0) >> 5;
-//     const EB = ((dataField & 0x10) === 0x10);
-//     if (numButtons === 0 && !EB) retValue = {
-//       "AI": false, 
-//       "A0": false, 
-//       "BI": false, 
-//       "B0": false
-//     };
-
-//   } else if (T21 && NU) {
-//     // message
-//     const SA = dataField & 0x01;
-//     const R1 = (dataField & 0xE0) >> 5;
-//     const R2 = (dataField & 0x0E) >> 1;
-//     const EB = ((dataField & 0x10) === 0x10);
-
-//     retValue[RockerActions[R1]] = EB;
-//     if (SA) {
-//       retValue[RockerActions[R2]] = EB;      
-//     }
-//   }
   return retValue;
 };
