@@ -10,13 +10,7 @@ const NU_FLAG = 0b00010000;
 // /** @type {DataPayload[]} */
 const DataPayload = ["byte0", "byte1", "byte2", "byte3"];
 
-const utils = require('../lib/utils'); // Get common adapter utils
-const adapter = utils.Adapter({
-    name: 'enocean'
-});
-
-adapter.log.info("test");
-("Test");
+console.log("test");
 
 /**
  * @param {RadioTelegram} telegram 
