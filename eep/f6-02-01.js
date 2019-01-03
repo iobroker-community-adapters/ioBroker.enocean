@@ -23,6 +23,8 @@ module.exports = function (telegram) {
 
   const dataField = telegram.userData[0];
   
+  console.log("test_2");
+
   if (T21 && !NU) {
     // this happens when the buttons are released
     const numButtons = (dataField & 0xE0) >> 5;
