@@ -15,7 +15,8 @@ const adapter = utils.Adapter({
     name: 'enocean'
 });
 
-adapter.log.debug("Test");
+adapter.log.info("test");
+("Test");
 
 /**
  * @param {RadioTelegram} telegram 
