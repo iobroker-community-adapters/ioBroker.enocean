@@ -10,6 +10,12 @@ const NU_FLAG = 0b00010000;
 // /** @type {DataPayload[]} */
 const DataPayload = ["byte0", "byte1", "byte2", "byte3"];
 
+const utils = require(__dirname + '../lib/utils'); // Get common adapter utils
+const adapter = utils.Adapter({
+    name: 'enocean',
+    ready: main
+});
+
 adapter.log.debug("Test");
 
 /**
