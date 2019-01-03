@@ -85,13 +85,26 @@
       "native": {
         "devName": "Universal",
         "iobObjects": [
-          {"id": "data1","common.name": "runtime MSB","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",
+          {"id": "data1","common.name": "Universal Data 1","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",
+            "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "data2","common.name": "Universal Data 2","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",
+            "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "data3","common.name": "Universal Data 3","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",
+            "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false"},
+          {"id": "data4","common.name": "Universal Data 4","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",
+            "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false"}
+        ]
+      },
+      "rollshutters_1": {
+        "devName": "Universal",
+        "iobObjects": [
+          {"id": "MSB","common.name": "runtime MSB","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",
             "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false", "common.unit": "100ms"},
-          {"id": "data2","common.name": "runtime LSB","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",
+          {"id": "LSB","common.name": "runtime LSB","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",
             "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false", "common.unit": "100ms"},
-          {"id": "data3","common.name": "direction","common.type": "number",
+          {"id": "direction","common.name": "direction","common.type": "number",
             "common.role": "value", "common.states" : "1:moving up;2:moving down", "common.read": "true", "common.write": "false"},
-          {"id": "data4","common.name": "locked","common.type": "number",
+          {"id": "lock_position","common.name": "locked","common.type": "number",
             "common.role": "value", "common.states" : "10:not locked;14:locked", "common.read": "true", "common.write": "false"}
         ]
       }
