@@ -21,11 +21,11 @@ module.exports = function (telegram) {
 
   const RORG = telegram.type.toString(16);
   
-  const DataByte0 = telegram.userData.data[0].toString(16);
-  const DataByte1 = telegram.userData.data[1].toString(16);
-  const DataByte2 = telegram.userData.data[2].toString(16);
-  const DataByte3 = telegram.userData.data[3].toString(16);
-  const Status = telegram.status.toString(16);
+//   const DataByte0 = telegram.userData.data[0].toString(16);
+//   const DataByte1 = telegram.userData.data[1].toString(16);
+//   const DataByte2 = telegram.userData.data[2].toString(16);
+//   const DataByte3 = telegram.userData.data[3].toString(16);
+//   const Status = telegram.status.toString(16);
   
   retValue = {"type": RORG, "type_int": telegram.type};
 
