@@ -9,7 +9,7 @@ const NU_FLAG = 0b00010000;
 /** @typedef {"byte0"|"byte1"|"byte2"|"byte3"} DataPayload  */
 // /** @type {DataPayload[]} */
 const DataPayload = ["byte0", "byte1", "byte2", "byte3"];
-console.log("michas file");
+
 /**
  * @param {RadioTelegram} telegram 
  */
@@ -17,10 +17,19 @@ module.exports = function (telegram) {
 
   let retValue = {};
 
-  //const RORG = telegram.type.toString(16);
-  const dataField = telegram.userData[0];
-  console.log("RORG: '" + telegram.type + "'" + " datafield: '" + dataField  +"'");
+  const RORG = telegram.type.toString(16)
+  const dataField0 = telegram.userData[0].toString(16);
+  const dataField1 = telegram.userData[1].toString(16);
+  const dataField2 = telegram.userData[2].toString(16);
+  const dataField3 = telegram.userData[3].toString(16);
+  console.log("RORG: '" + RORG + "'" + " datafield0: '" + dataField0  +"'" + " datafield1: '" + dataField1  +"'" + " datafield2: '" + dataField2  +"'" + " datafield3: '" + dataField3  +"'");
   
+  retValue = {
+    "data1": dataField0,
+    "data2": dataField1,
+    "data3": dataField2,
+    "data4": dataField3
+  };
 //   const DataByte0 = telegram.userData.data[0].toString(16);
 //   const DataByte1 = telegram.userData.data[1].toString(16);
 //   const DataByte2 = telegram.userData.data[2].toString(16);
@@ -46,6 +55,7 @@ module.exports = function (telegram) {
 //     // unknown -> Debug output of data
 //     retValue = {"type": RORG, "byte0": DataByte0, "byte1": DataByte1, "byte2": DataByte2, "byte3": DataByte3, "ststus": Status};
 //   }
+
 
   return retValue;
 };
