@@ -249,7 +249,7 @@ function handleType2Message(espPacket) {
     console.log(resp);
     switch(resp){
         case '1 0':          //Standard Response
-            adapter.log.debug('Response for command ' + returnCommonCMD(lastCMD[0] + ' return code: ' + returnResponse(retCode.toString(16)));
+            adapter.log.debug('Response for command ' + returnCommonCMD(lastCMD[0]) + ' return code: ' + returnResponse(retCode.toString(16)));
             lastCMD.splice(0, 1);
             break;
         case '3 0':         //Response for CO_RD_REPEATER | CO_GET_FREQUENCY_INFO
