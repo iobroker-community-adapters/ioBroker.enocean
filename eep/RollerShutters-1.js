@@ -25,10 +25,10 @@ module.exports = function (telegram) {
   
   // Debug
   console.log("RORG: '" + RORG + "'" + 
-              " MSB: '" + DataPayLoad["byte0"] +"'" + 
-              " LSB: '" + DataPayLoad["byte1"] +"'" + 
-              " status: '" + DataPayLoad["byte2"] +"'" + 
-              " lock: '" + DataPayLoad["byte3"] +"'");
+              " datafield0: '" + DataPayLoad["byte0"] +"'" + 
+              " datafield1: '" + DataPayLoad["byte1"] +"'" + 
+              " datafield2: '" + DataPayLoad["byte2"] +"'" + 
+              " datafield3: '" + DataPayLoad["byte3"] +"'");
   
   // handle different message types
   switch(RORG){
@@ -36,7 +36,7 @@ module.exports = function (telegram) {
       retValue = {
         "MSB": DataPayLoad["byte0"],
         "LSB": DataPayLoad["byte1"],
-        "status": DataPayLoad["byte2"],
+        "lastAction": DataPayLoad["byte2"],
         "lock": DataPayLoad["byte3"]
       };
       break;
@@ -46,11 +46,11 @@ module.exports = function (telegram) {
       };
       break;
     default:
-      console.log("Unknown Message Type - RORG: '" + RORG + "'" + 
-                  " MSB: '" + DataPayLoad["byte0"] +"'" + 
-                  " LSB: '" + DataPayLoad["byte1"] +"'" + 
-                  " status: '" + DataPayLoad["byte2"] +"'" + 
-                  " lock: '" + DataPayLoad["byte3"] +"'");
+    console.log("Unknown message Type - RORG: '" + RORG + "'" + 
+                " datafield0: '" + DataPayLoad["byte0"] +"'" + 
+                " datafield1: '" + DataPayLoad["byte1"] +"'" + 
+                " datafield2: '" + DataPayLoad["byte2"] +"'" + 
+                " datafield3: '" + DataPayLoad["byte3"] +"'");
   }
 
   return retValue;
