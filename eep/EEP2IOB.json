@@ -95,7 +95,7 @@
             "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false"}
         ]
       },
-      "rollshutters_1": {
+      "rollershutters_1": {
         "devName": "Universal",
         "iobObjects": [
           {"id": "MSB","common.name": "runtime MSB","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",

@@ -6,9 +6,9 @@ const RadioTelegram = require('../lib/esp3Packet').RadioTelegram;
 const T21_FLAG = 0b00100000;
 const NU_FLAG = 0b00010000;
 
-/** @typedef {"byte0"|"byte1"|"byte2"|"byte3"} DataPayload  */
+/** @typedef {"byte0"|"byte1"|"byte2"|"byte3"} DataPayLoad  */
 // /** @type {DataPayload[]} */
-const DataPayload = ["byte0", "byte1", "byte2", "byte3"];
+const DataPayLoad = ["byte0", "byte1", "byte2", "byte3"];
 
 /**
  * @param {RadioTelegram} telegram 
@@ -18,44 +18,38 @@ module.exports = function (telegram) {
   let retValue = {};
 
   const RORG = telegram.type.toString(16)
-  const dataField0 = telegram.userData[0].toString(16);
-  const dataField1 = telegram.userData[1].toString(16);
-  const dataField2 = telegram.userData[2].toString(16);
-  const dataField3 = telegram.userData[3].toString(16);
-  console.log("RORG: '" + RORG + "'" + " datafield0: '" + dataField0  +"'" + " datafield1: '" + dataField1  +"'" + " datafield2: '" + dataField2  +"'" + " datafield3: '" + dataField3  +"'");
+  DataPayLoad["byte0"] = telegram.userData[0];
+  DataPayLoad["byte1"] = telegram.userData[1];
+  DataPayLoad["byte2"] = telegram.userData[2];
+  DataPayLoad["byte3"] = telegram.userData[3];
   
-  retValue = {
-    "data1": dataField0,
-    "data2": dataField1,
-    "data3": dataField2,
-    "data4": dataField3
-  };
-//   const DataByte0 = telegram.userData.data[0].toString(16);
-//   const DataByte1 = telegram.userData.data[1].toString(16);
-//   const DataByte2 = telegram.userData.data[2].toString(16);
-//   const DataByte3 = telegram.userData.data[3].toString(16);
-//   const Status = telegram.status.toString(16);
+  // Debug
+  console.log("RORG: '" + RORG + "'" + 
+              " datafield0: '" + DataPayLoad["byte0"] +"'" + 
+              " datafield1: '" + DataPayLoad["byte1"] +"'" + 
+              " datafield2: '" + DataPayLoad["byte2"] +"'" + 
+              " datafield3: '" + DataPayLoad["byte3"] +"'");
   
-//retValue = {"type": RORG, "type_int": telegram.type};
-
-  // Distinguish between BS4 (a5) and RPS (f6)
-//   if (RORG == 0xA5){ 
-//     // BS4
-//     retValue['data1'] = telegram.userData.data[0];
-//     retValue['data2'] = telegram.userData.data[1];
-//     retValue['data3'] = telegram.userData.data[2];
-//     retValue['data4'] = telegram.userData.data[3];
-//     retValue = {"type": RORG, "byte0": DataByte0, "byte1": DataByte1, "byte2": DataByte2, "byte3": DataByte3, "ststus": Status};
-
-//   } else if (RORG == 0xF6) { 
-//     // RPS
-//     retValue = {"type": RORG, "byte0": DataByte0, "byte1": DataByte1, "byte2": DataByte2, "byte3": DataByte3, "ststus": Status};
-  
-//   } else { 
-//     // unknown -> Debug output of data
-//     retValue = {"type": RORG, "byte0": DataByte0, "byte1": DataByte1, "byte2": DataByte2, "byte3": DataByte3, "ststus": Status};
-//   }
-
+  // handle different message types
+  switch(RORG){
+    case 'a5':
+      retValue = {
+        "data1": DataPayLoad["byte0"],
+        "data2": DataPayLoad["byte1"],
+        "data3": DataPayLoad["byte2"],
+        "data4": DataPayLoad["byte3"]
+      };
+      break;
+    case 'f6':
+        // nothing yet
+      break;
+    default:
+      console.log("Unknown Message Type - RORG: '" + RORG + "'" + 
+                  " datafield0: '" + DataPayLoad["byte0"] +"'" + 
+                  " datafield1: '" + DataPayLoad["byte1"] +"'" + 
+                  " datafield2: '" + DataPayLoad["byte2"] +"'" + 
+                  " datafield3: '" + DataPayLoad["byte3"] +"'");
+  }
 
   return retValue;
 };
