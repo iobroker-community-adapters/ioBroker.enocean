@@ -32,7 +32,7 @@ module.exports = function (telegram) {
   
   // handle different message types
   switch(RORG){
-    case 'a5':
+    case 'a5': // 4BS Message
       retValue = {
         "data1": DataPayLoad["byte0"],
         "data2": DataPayLoad["byte1"],
@@ -40,8 +40,13 @@ module.exports = function (telegram) {
         "data4": DataPayLoad["byte3"]
       };
       break;
-    case 'f6':
-        // nothing yet
+    case 'f6': // RPS Message
+      retValue = {
+        "data1": DataPayLoad["byte0"],
+        "data2": 0,
+        "data3": 0,
+        "data4": 0
+      };
       break;
     default:
       console.log("Unknown Message Type - RORG: '" + RORG + "'" + 

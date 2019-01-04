@@ -27,28 +27,30 @@ module.exports = function (telegram) {
   console.log("RORG: '" + RORG + "'" + 
               " MSB: '" + DataPayLoad["byte0"] +"'" + 
               " LSB: '" + DataPayLoad["byte1"] +"'" + 
-              " direction: '" + DataPayLoad["byte2"] +"'" + 
-              " lock_position: '" + DataPayLoad["byte3"] +"'");
+              " status: '" + DataPayLoad["byte2"] +"'" + 
+              " lock: '" + DataPayLoad["byte3"] +"'");
   
   // handle different message types
   switch(RORG){
-    case 'a5':
+    case 'a5':  // 4BS Message - Responses from Actor
       retValue = {
         "MSB": DataPayLoad["byte0"],
         "LSB": DataPayLoad["byte1"],
-        "direction": DataPayLoad["byte2"],
-        "lock_position": DataPayLoad["byte3"]
+        "status": DataPayLoad["byte2"],
+        "lock": DataPayLoad["byte3"]
       };
       break;
-    case 'f6':
-        // nothing yet
+    case 'f6': // RPS Message - command to Actor
+      retValue = {
+        "status": DataPayLoad["byte0"]
+      };
       break;
     default:
       console.log("Unknown Message Type - RORG: '" + RORG + "'" + 
                   " MSB: '" + DataPayLoad["byte0"] +"'" + 
                   " LSB: '" + DataPayLoad["byte1"] +"'" + 
-                  " direction: '" + DataPayLoad["byte2"] +"'" + 
-                  " lock_position: '" + DataPayLoad["byte3"] +"'");
+                  " status: '" + DataPayLoad["byte2"] +"'" + 
+                  " lock: '" + DataPayLoad["byte3"] +"'");
   }
 
   return retValue;

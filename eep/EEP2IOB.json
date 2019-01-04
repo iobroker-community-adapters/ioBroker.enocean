@@ -102,9 +102,9 @@
             "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false", "common.unit": "100ms"},
           {"id": "LSB","common.name": "runtime LSB","common.type": "number","common.min": "0","common.max": "16777215","common.def": "0",
             "common.role": "value", "common.states" : "", "common.read": "true", "common.write": "false", "common.unit": "100ms"},
-          {"id": "direction","common.name": "direction","common.type": "number",
-            "common.role": "value", "common.states" : "1:moving up;2:moving down", "common.read": "true", "common.write": "false"},
-          {"id": "lock_position","common.name": "locked","common.type": "number",
+          {"id": "status","common.name": "direction","common.type": "number",
+            "common.role": "value", "common.states" : "1:moving up;2:moving down;80:Down position reached;160:UP position reached", "common.read": "true", "common.write": "false"},
+          {"id": "lock","common.name": "locked","common.type": "number",
             "common.role": "value", "common.states" : "10:not locked;14:locked", "common.read": "true", "common.write": "false"}
         ]
       }
