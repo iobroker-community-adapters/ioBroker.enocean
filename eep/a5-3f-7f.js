@@ -17,8 +17,9 @@ module.exports = function (telegram) {
 
   let retValue = {};
 
-  const RORG = telegram.type.toString(16);
-  console.log("RORG_HEX: '" + RORG + "'" + " RORG: '" + telegram.type + "'");
+  //const RORG = telegram.type.toString(16);
+  const dataField = telegram.userData[0];
+  console.log("RORG: '" + telegram.type + "'" + " datafield: '" + dataField  +"'");
   
 //   const DataByte0 = telegram.userData.data[0].toString(16);
 //   const DataByte1 = telegram.userData.data[1].toString(16);
