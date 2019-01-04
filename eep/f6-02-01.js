@@ -9,7 +9,7 @@ const NU_FLAG = 0b00010000;
 /** @typedef {"AI"|"A0"|"BI"|"B0"} RockerAction  */
 /** @type {RockerAction[]} */
 const RockerActions = ["AI", "A0", "BI", "B0"];
-
+console.log("original file");
 /**
  * @param {RadioTelegram} telegram 
  */
@@ -23,7 +23,7 @@ module.exports = function (telegram) {
 
   const dataField = telegram.userData[0];
   
-  console.log("test_2");
+  console.log("RORG: '" + telegram.type + "'" + " datafield: '" + dataField  +"'");
 
   if (T21 && !NU) {
     // this happens when the buttons are released

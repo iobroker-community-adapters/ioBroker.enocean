@@ -9,7 +9,7 @@ const NU_FLAG = 0b00010000;
 /** @typedef {"byte0"|"byte1"|"byte2"|"byte3"} DataPayload  */
 // /** @type {DataPayload[]} */
 const DataPayload = ["byte0", "byte1", "byte2", "byte3"];
-
+console.log("michas file");
 /**
  * @param {RadioTelegram} telegram 
  */
@@ -18,7 +18,7 @@ module.exports = function (telegram) {
   let retValue = {};
 
   const RORG = telegram.type.toString(16);
-  console.log("RORG: '" + RORG + "'");
+  console.log("RORG_HEX: '" + RORG + "'" + " RORG: '" + telegram.type + "'");
   
 //   const DataByte0 = telegram.userData.data[0].toString(16);
 //   const DataByte1 = telegram.userData.data[1].toString(16);
