@@ -27,7 +27,7 @@ module.exports = function (telegram) {
 //   const DataByte3 = telegram.userData.data[3].toString(16);
 //   const Status = telegram.status.toString(16);
   
-  retValue = {"type": RORG, "type_int": telegram.type};
+//retValue = {"type": RORG, "type_int": telegram.type};
 
   // Distinguish between BS4 (a5) and RPS (f6)
 //   if (RORG == 0xA5){ 
