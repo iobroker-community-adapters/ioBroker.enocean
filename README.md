@@ -1,5 +1,8 @@
 ![Logo](admin/EnOcean.png)
 # ioBroker.enocean
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/iobroker-community-adapters/ioBroker.enocean.svg)](https://greenkeeper.io/)
+
 =================
 
 
