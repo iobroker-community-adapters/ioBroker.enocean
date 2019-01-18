@@ -98,7 +98,7 @@
         "mode": "daemon",
         "icon": "EnOcean.png",
         "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/jey-cee/ioBroker.enocean/master/admin/EnOcean.png",
+        "extIcon": "https://raw.githubusercontent.com/iobroker-community-adapters/ioBroker.enocean/master/admin/EnOcean.png",
         "keywords": [
             "EnOcean",
             "vis",
@@ -106,7 +106,7 @@
             "graphical",
             "scada"
         ],
-        "readme": "https://github.com/jey-cee/ioBroker.enocean/blob/master/README.md",
+        "readme": "https://github.com/iobroker-community-adapters/ioBroker.enocean/blob/master/README.md",
         "loglevel": "info",
         "type": "hardware",
         "messagebox": true,
