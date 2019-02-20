@@ -107,6 +107,7 @@
             "scada"
         ],
         "readme": "https://github.com/iobroker-community-adapters/ioBroker.enocean/blob/master/README.md",
+        "license": "MIT",
         "loglevel": "info",
         "type": "hardware",
         "messagebox": true,
