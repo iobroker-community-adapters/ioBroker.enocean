@@ -81,7 +81,7 @@
                 "pl": "Dodano Autodetect dla UTE (Unidirectional) Teach-in \nDodano Autodetect dla przełączników Rocker \nDodano pełną obsługę tylko do odczytu dla PSC234 \nDodano obsługę wielu EEP \nUsunięto nieużywane obiekty z informacji\n"
             }
         },
-        "title": "Javascript/Node.js based EnOcean adapter",
+        "title": "EnOcean",
         "desc": {
             "en": "ioBroker EnOcean Adapter",
             "de": "ioBroker EnOcean Adapter",
