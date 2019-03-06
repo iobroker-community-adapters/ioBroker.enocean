@@ -93,6 +93,7 @@
             "es": "Adaptador ioBroker EnOcean",
             "pl": "Adapter ioOkrok EnOcean"
         },
+        "license": "MIT",
         "materialize": true,
         "platform": "Javascript/Node.js",
         "mode": "daemon",
