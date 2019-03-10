@@ -1,6 +1,6 @@
 ![Logo](admin/EnOcean.png)
 # ioBroker.enocean
-
+![Number of Installations](http://iobroker.live/badges/enocean-installed.svg) ![Number of Installations](http://iobroker.live/badges/enocean-stable.svg) 
 [![Greenkeeper badge](https://badges.greenkeeper.io/iobroker-community-adapters/ioBroker.enocean.svg)](https://greenkeeper.io/)
 
 =================
