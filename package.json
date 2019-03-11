@@ -28,7 +28,8 @@
     "url": "https://github.com/iobroker-community-adapters/ioBroker.enocean"
   },
   "dependencies": {
-    "serialport": "^7.1.3"
+    "serialport": "^7.1.3",
+    "@iobroker/adapter-core": "^1.0.3"
   },
   "devDependencies": {
     "@types/node": "^11.9.0",
