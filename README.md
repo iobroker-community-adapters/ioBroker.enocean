@@ -1,3 +1,5 @@
+# This Adapter is no longer maintained, please use the new EnOcean Adapter -> https://github.com/Jey-Cee/ioBroker.enocean
+
 ![Logo](admin/EnOcean.png)
 # ioBroker.enocean
 ![Number of Installations](http://iobroker.live/badges/enocean-installed.svg) ![Number of Installations](http://iobroker.live/badges/enocean-stable.svg) 
